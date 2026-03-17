@@ -1,0 +1,23 @@
+{
+    "name": "ui5",
+    "version": "0.0.1",
+    "description": "Claude plugin for SAPUI5 / OpenUI5. Create and validate UI5 projects, access API documentation, run UI5 linter, get development guidelines and best practices for UI5 development.",
+    "author": {
+        "name": "SAP SE"
+    },
+    "homepage": "https://github.com/UI5/claude-plugin",
+    "repository": "https://github.com/UI5/claude-plugin",
+    "license": "Apache-2.0",
+    "keywords": [
+        "sap",
+        "ui5",
+        "sapui5",
+        "openui5",
+        "claude",
+        "plugin",
+        "linter",
+        "api documentation",
+        "development guidelines",
+        "best practices"
+    ]
+}

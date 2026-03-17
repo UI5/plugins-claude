@@ -1,0 +1,43 @@
+name: Bug Report
+description: Report an issue related to UI5 Claude Plugin
+type: Bug
+body:
+  - type: markdown
+    attributes: 
+      value: |
+        Please have a look at our [contributing guidelines](https://github.com/UI5/claude-plugin/blob/main/CONTRIBUTING.md#-reporting-issues) on reporting issues.
+
+        > [!TIP]
+        > You can easily create an MRE using a fork of our [OpenUI5 sample app](https://github.com/UI5/sample-app).
+        > 
+        > Alternatively, share a version of your existing project that has been stripped down to a minimum sufficient to reproduce the issue.  
+        > Please do not share real business data or other sensitive information.
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: What is the issue and how can we reproduce it?
+      description: |
+        To help us understand and resolve the issue efficiently, please provide a **minimal reproducible example** (required) and steps that clearly illustrate the unexpected behavior.
+      value: |
+        1. Use following renovate.json config file ...
+        2. Check PR #XX on ...
+        3. ... --> **Issue:** ...
+        
+        #### Error:
+        > ...
+        
+        #### Expected behavior:
+        ...
+    validations:
+      required: true
+  - type: checkboxes
+    id: issue-checked
+    attributes:
+      label: Confirmation
+      description: |
+        To avoid duplicates and ensure efficient issue resolution, please double-check whether a similar issue has been reported or discussed already either in this UI5 Claude Plugin repository or at community sites like [Stack Overflow](https://stackoverflow.com/search?tab=active&q=%5bui5-renovate-preset-config%5d%20is%3aquestion&searchOn=3).
+      options:
+        - label: I have searched the existing issues and reviewed the relevant documentation as well as the UI5 Claude Plugin documentation.
+          required: true
+        - label: I am not disclosing any internal or sensitive information.
+          required: true

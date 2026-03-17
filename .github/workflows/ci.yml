@@ -1,0 +1,31 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: General checks
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v6
+    - name: Use Node.js 22
+      uses: actions/setup-node@v6
+      with:
+        node-version: 22
+
+    - name: Install dependencies
+      run: npm ci --engine-strict # --engine-strict is used to fail-fast if deps require node versions unsupported by the repo
+
+    - name: Perform Prettier check
+      run: npm run prettier:check
+
+    - name: Perform Licenses check
+      run: npm run check-licenses
+
+    - name: Perform dependency check
+      run: npm run knip
