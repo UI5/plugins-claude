@@ -1,0 +1,16 @@
+version: 2
+updates:
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "weekly"
+  commit-message:
+    prefix: "ci(github-actions)"
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: "daily"
+  versioning-strategy: increase
+  commit-message:
+    prefix: "deps"
+    prefix-development: "build(deps-dev)"
