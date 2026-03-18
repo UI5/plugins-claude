@@ -37,7 +37,7 @@
     "@commitlint/cli": "^20.4.4",
     "@commitlint/config-conventional": "^20.4.4",
     "husky": "^9.1.7",
-    "knip": "^5.86.0",
+    "knip": "^5.88.0",
     "licensee": "^12.0.1",
     "prettier": "3.8.1"
   }
