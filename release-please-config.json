@@ -67,7 +67,12 @@
             "extra-files": [
                 {
                     "type": "json",
-                    "path": "**/.claude-plugin/plugin.json",
+                    "path": "plugins/ui5/.claude-plugin/plugin.json",
+                    "jsonpath": "$..version"
+                },
+                {
+                    "type": "json",
+                    "path": "plugins/ui5-typescript-conversion/.claude-plugin/plugin.json",
                     "jsonpath": "$..version"
                 }
             ]
