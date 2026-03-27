@@ -1,6 +1,6 @@
 {
   "name": "@ui5/plugins-claude",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": "true",
   "description": "UI5 plugins for Claude",
   "author": {

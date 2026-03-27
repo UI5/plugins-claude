@@ -1,6 +1,6 @@
 {
     "name": "ui5-typescript-conversion",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "description": "SAPUI5 / OpenUI5 plugin for Claude. Convert JavaScript based UI5 projects to TypeScript.",
     "author": {
         "name": "SAP SE"

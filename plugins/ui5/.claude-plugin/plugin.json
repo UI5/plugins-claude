@@ -1,6 +1,6 @@
 {
     "name": "ui5",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "description": "SAPUI5 / OpenUI5 plugin for Claude. Create and validate UI5 projects, access API documentation, run UI5 linter, get development guidelines and best practices for UI5 development.",
     "author": {
         "name": "SAP SE"
