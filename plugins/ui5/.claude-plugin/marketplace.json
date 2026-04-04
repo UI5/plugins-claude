@@ -1,0 +1,13 @@
+{
+  "name": "ui5",
+  "owner": {
+    "name": "SAP SE"
+  },
+  "plugins": [
+    {
+      "name": "ui5",
+      "description": "SAPUI5/OpenUI5 plugin for Claude. Create and validate UI5 projects, access API documentation, run UI5 linter, and get development guidelines.",
+      "source": "./"
+    }
+  ]
+}

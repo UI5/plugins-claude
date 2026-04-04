@@ -1,0 +1,13 @@
+{
+  "name": "ui5-typescript-conversion",
+  "owner": {
+    "name": "SAP SE"
+  },
+  "plugins": [
+    {
+      "name": "ui5-typescript-conversion",
+      "description": "Convert JavaScript-based SAPUI5/OpenUI5 projects to TypeScript.",
+      "source": "./"
+    }
+  ]
+}
