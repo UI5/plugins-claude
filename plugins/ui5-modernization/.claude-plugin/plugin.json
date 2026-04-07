@@ -1,0 +1,23 @@
+{
+    "name": "ui5-modernization",
+    "version": "0.1.0",
+    "description": "Complete UI5 modernization toolkit with workflow and specialized fix patterns for producing modernized UI5 code in SAPUI5/OpenUI5 applications",
+    "author": {
+        "name": "SAP SE"
+    },
+    "homepage": "https://github.com/UI5/plugins-claude",
+    "repository": "https://github.com/UI5/plugins-claude",
+    "license": "Apache-2.0",
+    "keywords": [
+        "sap",
+        "ui5",
+        "sapui5",
+        "openui5",
+        "claude",
+        "plugin",
+        "migration",
+        "linter",
+        "modernization"
+    ],
+    "skills": "../skills"
+}
