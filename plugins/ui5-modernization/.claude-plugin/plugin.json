@@ -18,6 +18,5 @@
         "migration",
         "linter",
         "modernization"
-    ],
-    "skills": "../skills"
+    ]
 }
