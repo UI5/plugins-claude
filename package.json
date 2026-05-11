@@ -32,7 +32,15 @@
     "prettier": "prettier **/.mcp.json **/plugin.json",
     "prettier:write": "npm run prettier -- --write",
     "prettier:check": "npm run prettier -- --check",
-    "test": "npm run prettier:check && npm run knip && npm run check-licenses"
+    "test": "npm run prettier:check && npm run knip && npm run check-licenses && npm run test:ui5-guidelines",
+    "test:ui5-guidelines": "node plugins/ui5-guidelines/test/index.js",
+    "test:ui5-guidelines:structure": "node plugins/ui5-guidelines/test/index.js --suite structure",
+    "test:ui5-guidelines:triggering": "node plugins/ui5-guidelines/test/index.js --suite triggering",
+    "test:ui5-guidelines:performance": "node plugins/ui5-guidelines/test/index.js --suite performance",
+    "metrics": "node plugins/ui5-guidelines/scripts/analyze.js",
+    "metrics:week": "node plugins/ui5-guidelines/scripts/analyze.js --days 7",
+    "metrics:month": "node plugins/ui5-guidelines/scripts/analyze.js --days 30",
+    "metrics:optimize": "node plugins/ui5-guidelines/scripts/analyze.js --optimize"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.3",

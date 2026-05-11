@@ -1,0 +1,89 @@
+{
+  "version": "1.0.0",
+  "description": "Skill triggering test cases for validation",
+  "tests": [
+    {
+      "prompt": "How do I set up async module loading in UI5?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Show me XML event handler with $source model",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true
+    },
+    {
+      "prompt": "What's the best way to configure CSP in Component.js?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true
+    },
+    {
+      "prompt": "How to detect UI5 version at runtime?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Show me IAsyncContentCreation interface example",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Convert my UI5 controller from JavaScript to TypeScript",
+      "expected_skill": "ui5-typescript-expert",
+      "should_trigger": true
+    },
+    {
+      "prompt": "How to handle Button$PressEvent type in TypeScript?",
+      "expected_skill": "ui5-typescript-expert",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Set up ts-interface-generator for my UI5 project",
+      "expected_skill": "ui5-typescript-expert",
+      "should_trigger": true
+    },
+    {
+      "prompt": "TypeScript conversion for custom UI5 controls",
+      "expected_skill": "ui5-typescript-expert",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Create analytical card with donut chart",
+      "expected_skill": "ui5-integration-cards",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Fix 'No data to display' error in my Integration Card",
+      "expected_skill": "ui5-integration-cards",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Show me chart feed UIDs for bar chart",
+      "expected_skill": "ui5-integration-cards",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Configuration Editor setup for Integration Cards",
+      "expected_skill": "ui5-integration-cards",
+      "should_trigger": true
+    },
+    {
+      "prompt": "How do I use React hooks?",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Not UI5-related"
+    },
+    {
+      "prompt": "Python type hints tutorial",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Not UI5-related"
+    },
+    {
+      "prompt": "Create a REST API with Express",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Not UI5-related"
+    }
+  ]
+}

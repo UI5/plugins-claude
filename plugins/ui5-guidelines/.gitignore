@@ -1,0 +1,10 @@
+# Metrics and telemetry data (local only)
+.metrics/
+*.metrics.json
+
+# Test artifacts
+test/coverage/
+test/.tmp/
+
+# Node modules (if any local dependencies)
+node_modules/
