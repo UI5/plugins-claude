@@ -1,9 +1,9 @@
 ---
 name: ui5-typescript-expert
 description: |
-  Expert-level UI5 TypeScript conversion and migration skill. Use when converting UI5 JavaScript projects to TypeScript, migrating custom controls, setting up TypeScript tooling, handling runtime-generated methods, configuring ts-interface-generator, converting OPA/QUnit tests, managing control metadata, and ensuring type safety. Version-aware for UI5 >= 1.115.0 control-specific event types. Critical for TypeScript migrations including: ES6 class conversion, module imports, event type handling, constructor signatures, control library development, JSDoc preservation, enum attachment, and test framework conversion. Essential for maintaining type safety and preventing `any`/`unknown` shortcuts.
+  Expert-level UI5 TypeScript conversion and migration skill. Use when converting UI5 JavaScript projects to TypeScript, migrating custom controls, setting up TypeScript tooling (ts-interface-generator, ui5-tooling-transpile, tsconfig configuration), handling runtime-generated methods, configuring ts-interface-generator, converting OPA/QUnit tests, managing control metadata, and ensuring type safety. Version-aware for UI5 >= 1.115.0 control-specific event types. Critical for TypeScript migrations including: ES6 class conversion, module imports, event type handling, constructor signatures, control library development, JSDoc preservation, enum attachment, and test framework conversion. Triggers on ts-interface-generator setup, TypeScript project initialization, type definition configuration. Essential for maintaining type safety and preventing `any`/`unknown` shortcuts.
   
-  Keywords: ui5 typescript, typescript conversion, ts migration, ui5 ts, @sapui5/types, @openui5/types, ui5-tooling-transpile, ts-interface-generator, control conversion, MetadataOptions, control events, Button$PressEvent, custom controls, control libraries, enum attachment, OPA typescript, QUnit typescript, test conversion, JSDoc preservation, type safety, UI5 version detection, IAsyncContentCreation
+  Keywords: ui5 typescript, typescript conversion, ts migration, ui5 ts, @sapui5/types, @openui5/types, ui5-tooling-transpile, ts-interface-generator, setup ts-interface-generator, configure ts-interface-generator, tsconfig, control conversion, MetadataOptions, control events, Button$PressEvent, custom controls, control libraries, enum attachment, OPA typescript, QUnit typescript, test conversion, JSDoc preservation, type safety, UI5 version detection, IAsyncContentCreation, typescript setup, typescript configuration, typescript project setup, typescript tooling, convert to typescript, migrate to typescript
 ---
 
 # UI5 TypeScript Expert - Comprehensive Conversion Guide
@@ -567,208 +567,62 @@ export default class MyControl extends Control {
 
 ## 5. Control Library Conversion
 
-### 5.1 Enum Attachment (CRITICAL)
+**CRITICAL**: When converting control libraries, enums MUST be attached to the global library object to prevent XSS vulnerabilities.
 
-**CRITICAL FOR XSS PREVENTION**: Enums must be attached to global library object.
+### Quick Overview
+
+- Enums need global attachment via `ObjectPath.get()`
+- Path mapping required in `tsconfig.json`
+- `.library` file must be created manually
+
+### Example
 
 ```typescript
-// library.ts
 import ObjectPath from "sap/base/util/ObjectPath";
 
-// Define enum
 export enum ExampleColor {
-    Red = "Red",
-    Green = "Green",
-    Blue = "Blue"
+    Red = "Red", Green = "Green", Blue = "Blue"
 }
 
-// CRITICAL: Attach to global library object
+// CRITICAL: Attach to global
 const thisLib = ObjectPath.get("com.myorg.mylib") as {[key: string]: unknown};
 thisLib.ExampleColor = ExampleColor;
 ```
 
-**Why This is Critical**:
-- Control properties reference types as global names: `type: "com.myorg.mylib.ExampleColor"`
-- UI5 runtime validates property types via this global path
-- Without attachment, validation breaks, creating XSS vulnerabilities
-
-### 5.2 Path Mapping
-
-In `tsconfig.json`:
-
-```json
-{
-    "compilerOptions": {
-        "paths": {
-            "com/myorg/mylib/*": ["./src/*"]
-        }
-    }
-}
-```
+**For complete control library conversion guide**, see [references/control-library-conversion.md](references/control-library-conversion.md)
 
 ---
 
 ## 6. Test Conversion
 
-### 6.1 QUnit Tests
+**KEY CHANGE**: OPA5 tests in TypeScript use class-based page objects WITHOUT Given/When/Then parameters.
 
-Before:
-```javascript
-sap.ui.define(["sap/ui/thirdparty/qunit-2"], function(QUnit) {
-    QUnit.test("should add numbers", function(assert) {
-        assert.equal(1 + 1, 2);
-    });
-});
-```
+### Quick Overview
 
-After:
-```typescript
-import QUnit from "sap/ui/thirdparty/qunit-2";
+**QUnit**: Replace `sap.ui.define` with import statements
 
-QUnit.test("should add numbers", function(assert) {
-    assert.equal(1 + 1, 2);
-});
-```
+**OPA5 Architecture Change**:
+- NO Given/When/Then parameters in opaTest callback
+- Create page instances BEFORE tests: `const onTheAppPage = new AppPage();`
+- Page objects extend Opa5 (no `createPageObjects()`)
 
-### 6.2 Test Suite Registration
+### Example
 
-```typescript
-// testsuite.qunit.ts
-export default {
-    name: "Test Suite for com.myorg.myapp",
-    defaults: {
-        page: "ui5://test-resources/...",
-        loader: {
-            paths: {
-                "com/myorg/myapp": "../",
-                "integration": "./integration",
-                "unit": "./unit"
-            }
-        }
-    },
-    tests: {
-        "unit/unitTests": { title: "Unit Tests" },
-        "integration/opaTests": { title: "Integration Tests" }
-    }
-};
-```
-
-### 6.3 OPA Integration Tests - Architecture Change
-
-**JavaScript Pattern (OLD) - NOT USED IN TYPESCRIPT**:
-```javascript
-sap.ui.define(["sap/ui/test/opaQunit", "./pages/App"], (opaTest) => {
-    opaTest("should add item", (Given, When, Then) => {
-        Given.iStartMyApp();
-        When.onTheAppPage.iEnterText("test");
-        Then.onTheAppPage.iShouldSeeItem("test");
-    });
-});
-```
-
-**TypeScript Pattern (NEW) - MUST BE USED**:
 ```typescript
 import opaTest from "sap/ui/test/opaQunit";
 import AppPage from "./pages/AppPage";
-import QUnit from "sap/ui/thirdparty/qunit-2";
 
 const onTheAppPage = new AppPage();
 
-QUnit.module("Test Module");
-
 opaTest("Should add item", function () {
-    onTheAppPage.iStartMyUIComponent({
-        componentConfig: { name: "my.app" }
-    });
-    
+    onTheAppPage.iStartMyUIComponent({ componentConfig: { name: "my.app" } });
     onTheAppPage.iEnterText("test");
     onTheAppPage.iShouldSeeItem("test");
     onTheAppPage.iTeardownMyApp();
 });
 ```
 
-**Critical Rules**:
-1. **NO Given/When/Then parameters** in opaTest callback
-2. **Create page instances BEFORE tests**: `const onTheAppPage = new AppPage();`
-3. **Call methods directly on page instance**
-
-### 6.4 OPA Page Objects - Class-Based
-
-```typescript
-// AppPage.ts
-import Opa5 from "sap/ui/test/Opa5";
-import Press from "sap/ui/test/actions/Press";
-
-const viewName = "my.app.view.Main";
-
-export default class AppPage extends Opa5 {
-    iEnterText(text: string) {
-        return this.waitFor({
-            id: "input",
-            viewName,
-            actions: function(input: any) {
-                input.setValue(text);
-            }
-        });
-    }
-    
-    iShouldSeeItem(text: string) {
-        return this.waitFor({
-            controlType: "sap.m.StandardListItem",
-            viewName,
-            matchers: function(item: any) {
-                return item.getTitle() === text;
-            },
-            success: function() {
-                Opa5.assert.ok(true, `Item '${text}' found`);
-            }
-        });
-    }
-}
-```
-
-**Key Changes**:
-- NO `createPageObjects()` - use ES6 class extending Opa5
-- NO separation of actions/assertions - all methods in one class
-- Lifecycle methods (`iStartMyUIComponent`, `iTeardownMyApp`) inherited from Opa5
-
-### 6.5 Code Coverage (ui5-test-runner)
-
-If using `ui5-test-runner`, configure coverage:
-
-**package.json**:
-```json
-{
-    "scripts": {
-        "start-coverage": "ui5 serve --port 8080 --config ui5-coverage.yaml",
-        "test-ui5": "ui5-test-runner --start start-coverage --url http://localhost:8080/test/testsuite.qunit.html --coverage -ccb 60 -ccf 100 -ccl 80 -ccs 80"
-    },
-    "devDependencies": {
-        "babel-plugin-istanbul": "^6.1.1"
-    }
-}
-```
-
-**ui5-coverage.yaml**:
-```yaml
-server:
-  customMiddleware:
-    - name: ui5-tooling-transpile-middleware
-      afterMiddleware: compression
-      configuration:
-        debug: true
-        babelConfig:
-          sourceMaps: true
-          ignore:
-            - "**/*.d.ts"
-          presets:
-            - - "@babel/preset-env"
-              - targets: defaults
-            - - transform-ui5
-            - "@babel/preset-typescript"
-          plugins:
-            - istanbul
-```
+**For complete test conversion guide** (OPA5 class-based pattern, QUnit setup, coverage configuration), see [references/test-conversion-guide.md](references/test-conversion-guide.md)
 
 ---
 
@@ -1034,21 +888,18 @@ model.refreshSecurityToken(
 
 ## 9. Conversion Checklist
 
-- [ ] package.json: Add TypeScript dependencies
-- [ ] tsconfig.json: Created with correct paths
-- [ ] ui5.yaml: Add transpile middleware/task
-- [ ] Component.ts: Converted to ES6 class
-- [ ] Component.ts: Add IAsyncContentCreation interface (UI5 >= 1.90.0)
-- [ ] Controllers: Converted with proper event types (check UI5 version)
-- [ ] Custom controls: MetadataOptions + constructor signatures
-- [ ] ts-interface-generator: Run and commit `.gen.d.ts` files
-- [ ] Enums (libraries only): Attached to global object
-- [ ] Tests: Converted to Test Starter pattern (UI5 >= 1.113.0)
-- [ ] JSDoc: All comments preserved
-- [ ] No `any` types: Proper types used
-- [ ] Import statements: Use UI5 modules, not globals
-- [ ] Avoid deprecated APIs: No sync XHR, ODataModel async=true
-- [ ] `npm run ts-typecheck`: Passes without errors
+**Quick Checklist** (critical items):
+
+- [ ] Project setup: package.json, tsconfig.json, ui5.yaml configured
+- [ ] Component.ts: IAsyncContentCreation interface (UI5 >= 1.90.0)
+- [ ] Controllers: Version-aware event types (>= 1.115.0)
+- [ ] Custom controls: MetadataOptions + ts-interface-generator
+- [ ] Enums (libraries): Attached to global object
+- [ ] Tests: OPA5 class-based, Test Starter (>= 1.113.0)
+- [ ] Type safety: No `any`, proper imports
+- [ ] Validation: `npm run ts-typecheck` passes
+
+**For detailed conversion checklist** with validation steps and troubleshooting, see [references/conversion-checklist.md](references/conversion-checklist.md)
 
 ---
 

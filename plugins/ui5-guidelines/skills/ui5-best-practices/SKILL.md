@@ -1,9 +1,9 @@
 ---
 name: ui5-best-practices
 description: |
-  Comprehensive UI5 development best practices and coding standards skill. Use when writing UI5 applications to ensure modern, maintainable code following SAP standards. Triggers on: async module loading, data binding patterns, form creation, OData type selection, i18n management, CSP compliance, control event handling, TypeScript event types (UI5 >= 1.115.0), API reference lookups, linting validation, and local development server usage. Essential for writing production-ready UI5 code that follows enterprise standards.
+  Comprehensive UI5 development best practices and coding standards skill. Use when writing UI5 applications to ensure modern, maintainable code following SAP standards. Triggers on: async module loading, data binding patterns, form creation, OData type selection, i18n management, CSP compliance, control event handling, TypeScript event types (UI5 >= 1.115.0), API reference lookups, linting validation, local development server usage, version detection, IAsyncContentCreation interface (UI5 >= 1.90.0), XML event handlers ($source, $parameters, $event, $controller), Test Starter setup, Component metadata configuration, and runtime version checking with VersionInfo.load(). Essential for writing production-ready UI5 code that follows enterprise standards.
   
-  Keywords: ui5 coding standards, ui5 best practices, async loading, sap.ui.define, sap.ui.require, data binding, odata types, simple types, i18n translation, CSP content security policy, event handlers, Button$PressEvent, Table$RowSelectionChangeEvent, ui5 linter, API reference, ui5 serve, declarative component initialization, ComponentSupport, form layout, ColumnLayout, SimpleForm
+  Keywords: ui5 coding standards, ui5 best practices, async loading, sap.ui.define, sap.ui.require, data binding, odata types, simple types, i18n translation, CSP content security policy, event handlers, Button$PressEvent, Table$RowSelectionChangeEvent, ui5 linter, API reference, ui5 serve, declarative component initialization, ComponentSupport, form layout, ColumnLayout, SimpleForm, version detection, VersionInfo, IAsyncContentCreation, runtime version, detect ui5 version, XML event handling, $source, $parameters, $event, $controller, Test Starter, Component metadata, MetadataOptions, minUI5Version
 ---
 
 # UI5 Best Practices and Coding Standards
