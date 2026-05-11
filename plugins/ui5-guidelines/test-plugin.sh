@@ -1,15 +1,15 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Wrapper script for unified test suite
-# Runs the consolidated Node.js test runner
+# Wrapper script for TypeScript test suite
+# Builds and runs the TypeScript test runner
 
 PLUGIN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Check if Node.js is available
-if ! command -v node &> /dev/null; then
-    echo "❌ Node.js is required to run tests"
+# Check if npm is available
+if ! command -v npm &> /dev/null; then
+    echo "❌ npm is required to run tests"
     exit 1
 fi
 
-# Run unified test suite
-node "$PLUGIN_DIR/test/index.js" "$@"
+# Build and run tests
+cd "$PLUGIN_DIR" && npm test -- "$@"

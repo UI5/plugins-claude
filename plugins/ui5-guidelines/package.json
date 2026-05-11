@@ -1,0 +1,19 @@
+{
+  "name": "@ui5/guidelines-plugin",
+  "version": "2.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node dist/test/index.js",
+    "test:structure": "npm run build && node dist/test/index.js --suite structure",
+    "test:triggering": "npm run build && node dist/test/index.js --suite triggering",
+    "test:performance": "npm run build && node dist/test/index.js --suite performance",
+    "metrics": "npm run build && node dist/scripts/analyze.js",
+    "metrics:optimize": "npm run build && node dist/scripts/analyze.js --optimize"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
