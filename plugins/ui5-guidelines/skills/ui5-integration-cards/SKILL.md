@@ -540,235 +540,48 @@ Customize appearance with `chartProperties`:
 
 ---
 
+---
+
 ## 5. Configuration Editor
 
-### 5.1 Purpose and Personas
+**PURPOSE**: Allow users to customize cards without editing JSON directly.
 
-Configuration Editor allows different users to customize cards without editing JSON.
+### Quick Overview
 
-**Supported personas**:
-- **Administrator** (primary focus)
-- **Page/Content Administrator**
-- **Translator**
+- Design for **Administrator** persona
+- Two components: `dt/Configuration.js` + manifest.json reference
+- **CRITICAL**: Keep editor synchronized with manifest structure
 
-**Design for Administrator persona by default.**
-
-### 5.2 Structure
-
-Two components:
-
-1. **dt/Configuration.js** - Defines editor structure
-2. **manifest.json reference** - Links editor
+### Basic Setup
 
 ```json
 {
     "sap.card": {
         "configuration": {
-            "editor": "./dt/Configuration"  // ✅ Link to editor
+            "editor": "./dt/Configuration"
         }
     }
 }
 ```
 
-### 5.3 Configuration Editor Rules
-
-**CRITICAL SYNCHRONIZATION RULES**:
-
-1. **ALWAYS** ensure editor reflects current manifest structure
-2. **ALWAYS** make existing manifest fields configurable
-3. **NEVER** add editor fields that don't exist in manifest
-4. **ALWAYS** remove editor fields when removing from manifest
-5. **ALWAYS** add editor fields when adding to manifest
-
-### 5.4 dt/Configuration.js Template
-
 ```javascript
+// dt/Configuration.js
 sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
-    "use strict";
-
     return function () {
         return new Designtime({
             form: {
                 items: {
-                    // ===== GENERAL GROUP =====
-                    generalGroup: {
-                        type: "group",
-                        label: "General Settings"
-                    },
-                    
-                    cardTitle: {
-                        manifestpath: "/sap.card/configuration/parameters/cardTitle/value",
-                        type: "string",
-                        label: "Card Title",
-                        translatable: true,
-                        required: true,
-                        allowDynamicValues: true
-                    },
-                    
-                    icon: {
-                        manifestpath: "/sap.card/header/icon/src",
-                        type: "string",
-                        label: "Icon",
-                        visualization: {
-                            type: "IconSelect",
-                            settings: {
-                                value: "{currentSettings>value}",
-                                editable: "{currentSettings>editable}"
-                            }
-                        }
-                    },
-                    
-                    // ===== DATA GROUP =====
-                    dataGroup: {
-                        type: "group",
-                        label: "Data Settings"
-                    },
-                    
-                    maxItems: {
-                        manifestpath: "/sap.card/configuration/parameters/maxItems/value",
-                        type: "integer",
-                        label: "Maximum Items",
-                        visualization: {
-                            type: "Slider",
-                            settings: {
-                                value: "{currentSettings>value}",
-                                min: 1,
-                                max: 20,
-                                width: "100%",
-                                enabled: "{currentSettings>editable}"
-                            }
-                        }
-                    },
-                    
-                    showDetails: {
-                        manifestpath: "/sap.card/configuration/parameters/showDetails/value",
-                        type: "boolean",
-                        label: "Show Details",
-                        visualization: {
-                            type: "Switch",
-                            settings: {
-                                state: "{currentSettings>value}",
-                                customTextOn: "Yes",
-                                customTextOff: "No",
-                                enabled: "{currentSettings>editable}"
-                            }
-                        }
-                    },
-                    
-                    // ===== FILTER GROUP =====
-                    filterGroup: {
-                        type: "group",
-                        label: "Filtering"
-                    },
-                    
-                    category: {
-                        manifestpath: "/sap.card/configuration/parameters/category/value",
-                        type: "string",
-                        label: "Category",
-                        values: {
-                            data: {
-                                request: {
-                                    url: "{{destinations.backend}}/Categories"
-                                },
-                                path: "/value"
-                            },
-                            item: {
-                                key: "{CategoryID}",
-                                text: "{CategoryName}"
-                            }
-                        }
-                    }
+                    title: { manifestpath: "/sap.card/configuration/parameters/title/value", type: "string" }
                 }
-            },
-            preview: {
-                modes: "None"  // or "Abstract", "Live", "MockData"
             }
         });
     };
 });
 ```
 
-### 5.5 Common Visualizations
+**For complete Configuration Editor guide** (personas, validation, field types, manifest synchronization), see [references/configuration-editor-advanced.md](references/configuration-editor-advanced.md)
 
-**String input**:
-```javascript
-{
-    type: "string",
-    label: "Name"
-}
-```
-
-**Integer slider**:
-```javascript
-{
-    type: "integer",
-    visualization: {
-        type: "Slider",
-        settings: {
-            value: "{currentSettings>value}",
-            min: 1,
-            max: 100,
-            enabled: "{currentSettings>editable}"
-        }
-    }
-}
-```
-
-**Boolean switch**:
-```javascript
-{
-    type: "boolean",
-    visualization: {
-        type: "Switch",
-        settings: {
-            state: "{currentSettings>value}",
-            enabled: "{currentSettings>editable}"
-        }
-    }
-}
-```
-
-**Icon picker**:
-```javascript
-{
-    type: "string",
-    visualization: {
-        type: "IconSelect",
-        settings: {
-            value: "{currentSettings>value}",
-            editable: "{currentSettings>editable}"
-        }
-    }
-}
-```
-
-**Date picker**:
-```javascript
-{
-    type: "date",
-    label: "Start Date"
-}
-```
-
-**Dropdown with values**:
-```javascript
-{
-    type: "string",
-    values: {
-        data: {
-            request: {
-                url: "{{destinations.backend}}/Products"
-            },
-            path: "/value"
-        },
-        item: {
-            key: "{ProductID}",
-            text: "{ProductName}"
-        }
-    }
-}
-```
-
+---
 ---
 
 ## 6. Validation & Preview
@@ -977,3 +790,16 @@ https://ui5.sap.com/test-resources/sap/ui/integration/demokit/cardExplorer/webap
 **Version**: 1.0.0  
 **Last Updated**: 2026-05-11  
 **Compatible with**: UI5 1.71.0+, Integration Cards 1.0+
+
+## 8. Troubleshooting
+
+**Common Issues Quick Reference**:
+
+- ❌ **"No data to display"** → Check data path configuration (`sap.card/data/path` vs `content/data/path`)
+- ❌ **Chart not rendering** → Verify UID matches chart type exactly
+- ❌ **Parameters not working** → Check parameter binding syntax `{parameters>/key/value}`
+- ❌ **Destination failing** → Verify destination name in configuration
+
+**For detailed troubleshooting guide** with root cause analysis and resolution steps, see [references/troubleshooting-guide.md](references/troubleshooting-guide.md)
+
+---
