@@ -104,7 +104,12 @@ See [TESTING.md](TESTING.md) for comprehensive testing guide.
 
 ## Documentation
 
-- [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - Cheat sheet for common patterns
+**Start here**:
+- [USER_GUIDE.md](USER_GUIDE.md) - Complete user guide with examples
+- [DOCUMENTATION_SUMMARY.md](DOCUMENTATION_SUMMARY.md) - Overview of all docs
+
+**Reference**:
+- [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - Code cheat sheet
 - [TESTING.md](TESTING.md) - Testing and metrics guide
 - [CHANGELOG.md](CHANGELOG.md) - Version history
 
