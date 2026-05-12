@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp test/config/matching-config.json dist/test/config/ && cp test/fixtures/*.json dist/test/fixtures/ 2>/dev/null || true",
     "test": "npm run build && node dist/test/index.js",
     "test:structure": "npm run build && node dist/test/index.js --suite structure",
     "test:triggering": "npm run build && node dist/test/index.js --suite triggering",
@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "yaml": "^2.9.0"
   }
 }

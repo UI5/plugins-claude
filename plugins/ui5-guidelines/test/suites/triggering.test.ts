@@ -5,6 +5,7 @@
 
 import { join } from "path";
 import { readFileSync, existsSync } from "fs";
+import { loadMatchingConfig } from "../config/matching-config.js";
 import type { TestFramework } from "../lib/test-framework.js";
 import type { TriggerTestCases, SkillMetadata } from "../types.js";
 
@@ -15,67 +16,22 @@ interface SkillScore {
 
 /**
  * Simple keyword-based skill matcher (simulates Claude's skill selection)
+ * Uses configurable weights and patterns for easier tuning
  */
 function matchSkill(
   prompt: string,
   skills: SkillMetadata[]
 ): string | null {
+  const config = loadMatchingConfig();
   const promptLower = prompt.toLowerCase();
 
   // Anti-patterns: Explicitly non-UI5 frameworks
-  const antiPatterns = [
-    "react hook",
-    "python",
-    "express",
-    "django",
-    "flask",
-    "vue",
-    "angular",
-  ];
-
-  if (antiPatterns.some((pattern) => promptLower.includes(pattern))) {
+  if (config.antiPatterns.some((pattern) => promptLower.includes(pattern))) {
     return null;
   }
 
   // Required: Must contain UI5-related terms
-  const ui5Terms = [
-    "ui5",
-    "sapui5",
-    "openui5",
-    "sap.",
-    "component.js",
-    "component metadata",
-    "integration card",
-    "analytical card",
-    "list card",
-    "table card",
-    "calendar card",
-    "timeline card",
-    "object card",
-    "card destination",
-    "iasynccontentcreation",
-    "versioninfo",
-    "button$pressevent",
-    "table$rowselectionchangeevent",
-    "ts-interface-generator",
-    "ui5-tooling",
-    "$source",
-    "$parameters",
-    "$parameters and $event",
-    "$event",
-    "$controller",
-    "odata",
-    "xml view",
-    "xml views",
-    "xml event",
-    "chart feed",
-    "configuration editor",
-    "opa5",
-    "metadataoptions",
-    "minui5version",
-  ];
-
-  if (!ui5Terms.some((term) => promptLower.includes(term))) {
+  if (!config.ui5Terms.some((term) => promptLower.includes(term))) {
     return null;
   }
 
@@ -83,21 +39,20 @@ function matchSkill(
   const scores: SkillScore[] = skills.map((skill) => {
     let score = 0;
 
-    // Match keywords (higher weight)
+    // Match keywords (configurable weight)
     skill.keywords.forEach((keyword) => {
       if (promptLower.includes(keyword.toLowerCase())) {
-        score += 3;
+        score += config.weights.keywordMatch;
       }
     });
 
     // Match exact phrases in description (very high weight)
     const descLower = skill.description.toLowerCase();
-    if (promptLower.includes("component metadata") && descLower.includes("component metadata")) {
-      score += 10;
-    }
-    if (promptLower.includes("minui5version") && descLower.includes("minui5version")) {
-      score += 10;
-    }
+    config.exactPhrases.forEach((phrase) => {
+      if (promptLower.includes(phrase) && descLower.includes(phrase)) {
+        score += config.weights.exactPhrase;
+      }
+    });
 
     // Match description words (lower weight)
     const descWords = descLower.split(/\s+/);
@@ -105,7 +60,7 @@ function matchSkill(
     const overlap = descWords.filter(
       (w) => w.length > 3 && promptWords.includes(w)
     ).length;
-    score += overlap * 0.2;
+    score += overlap * config.weights.wordOverlap;
 
     return { name: skill.name!, score };
   });

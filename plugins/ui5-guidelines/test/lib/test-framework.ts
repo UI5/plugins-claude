@@ -5,6 +5,7 @@
 
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
+import { parse as parseYaml } from "yaml";
 import type {
   TestResults,
   TestResult,
@@ -27,34 +28,48 @@ export class TestFramework {
   }
 
   /**
+   * Record a successful or warning test result
+   */
+  private recordResult(
+    name: string,
+    result: void | boolean | "warning"
+  ): void {
+    if (result === true || result === undefined) {
+      console.log("✅");
+      this.results.passed++;
+      this.results.tests.push({ name, status: "passed" });
+    } else if (result === "warning") {
+      console.log("⚠️");
+      this.results.warnings++;
+      this.results.tests.push({ name, status: "warning" });
+    } else {
+      throw new Error(String(result) || "Test returned false");
+    }
+  }
+
+  /**
+   * Record a failed test result
+   */
+  private recordError(name: string, error: unknown): void {
+    const message = error instanceof Error ? error.message : String(error);
+    console.log(`❌ ${message}`);
+    this.results.failed++;
+    this.results.tests.push({
+      name,
+      status: "failed",
+      error: message,
+    });
+  }
+
+  /**
    * Run a synchronous test with automatic result tracking
    */
   test(name: string, fn: () => void | boolean | "warning"): void {
     process.stdout.write(`  ${name}... `);
-
     try {
-      const result = fn();
-
-      if (result === true || result === undefined) {
-        console.log("✅");
-        this.results.passed++;
-        this.results.tests.push({ name, status: "passed" });
-      } else if (result === "warning") {
-        console.log("⚠️");
-        this.results.warnings++;
-        this.results.tests.push({ name, status: "warning" });
-      } else {
-        throw new Error(String(result) || "Test returned false");
-      }
+      this.recordResult(name, fn());
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.log(`❌ ${message}`);
-      this.results.failed++;
-      this.results.tests.push({
-        name,
-        status: "failed",
-        error: message,
-      });
+      this.recordError(name, error);
     }
   }
 
@@ -66,30 +81,10 @@ export class TestFramework {
     fn: () => Promise<void | boolean | "warning">
   ): Promise<void> {
     process.stdout.write(`  ${name}... `);
-
     try {
-      const result = await fn();
-
-      if (result === true || result === undefined) {
-        console.log("✅");
-        this.results.passed++;
-        this.results.tests.push({ name, status: "passed" });
-      } else if (result === "warning") {
-        console.log("⚠️");
-        this.results.warnings++;
-        this.results.tests.push({ name, status: "warning" });
-      } else {
-        throw new Error(String(result) || "Test returned false");
-      }
+      this.recordResult(name, await fn());
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.log(`❌ ${message}`);
-      this.results.failed++;
-      this.results.tests.push({
-        name,
-        status: "failed",
-        error: message,
-      });
+      this.recordError(name, error);
     }
   }
 
@@ -112,6 +107,7 @@ export class TestFramework {
 
   /**
    * Load skill metadata from SKILL.md frontmatter
+   * Uses robust YAML parser to handle all valid YAML syntax
    */
   loadSkillMetadata(skillPath: string): SkillMetadata {
     const skillFilePath = join(this.pluginRoot, skillPath, "SKILL.md");
@@ -127,19 +123,22 @@ export class TestFramework {
       throw new Error(`No YAML frontmatter found in ${skillPath}`);
     }
 
-    const yaml = match[1];
+    const frontmatter = parseYaml(match[1]);
 
-    // Parse YAML (simple key-value and multiline)
-    const nameMatch = yaml.match(/^name:\s*(.+)$/m);
-    const descMatch = yaml.match(/^description:\s*\|?\n([\s\S]+?)(?=\n\w+:|$)/m);
-    const keywordsMatch = yaml.match(/^Keywords:\s*(.+)$/m);
+    // Extract keywords from either "keywords" or "Keywords" field
+    let keywords: string[] = [];
+    const keywordsField = frontmatter.keywords || frontmatter.Keywords;
+
+    if (Array.isArray(keywordsField)) {
+      keywords = keywordsField;
+    } else if (typeof keywordsField === "string") {
+      keywords = keywordsField.split(",").map((k) => k.trim());
+    }
 
     return {
-      name: nameMatch ? nameMatch[1].trim() : null,
-      description: descMatch ? descMatch[1].trim() : "",
-      keywords: keywordsMatch
-        ? keywordsMatch[1].split(",").map((k) => k.trim())
-        : [],
+      name: frontmatter.name ?? null,
+      description: frontmatter.description ?? "",
+      keywords,
       content,
     };
   }
