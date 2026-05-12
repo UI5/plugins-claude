@@ -171,6 +171,36 @@ ui5-guidelines/
 **Enhancement**: +1,101 lines of version-specific guidance (55% content increase from v1.0.0)  
 **Value**: Version-aware skills (UI5 1.136.7 patterns, 1.90.0+ interfaces, 1.115.0+ events)
 
+### After Phase 2 Optimization (v2.1.0)
+| Skill | Size | Reduction | References | Total |
+|-------|------|-----------|------------|-------|
+| ui5-best-practices | 862 lines | 0 | 0 | 862 |
+| ui5-typescript-expert | 929 lines | -149 (-13.8%) | 583 | 1,512 |
+| ui5-integration-cards | 805 lines | -174 (-17.8%) | 467 | 1,272 |
+| **Total Main** | **2,596 lines** | **-323 (-11.1%)** | **1,050** | **3,646** |
+
+**Phase 2 Improvements**:
+- Main context: 3,101 → 2,596 lines (323-line reduction)
+- References: 182 → 1,050 lines (868 lines extracted for on-demand loading)
+- All skills now under 930 lines
+- Progressive disclosure pattern fully implemented
+
+**TypeScript Skill References**:
+1. control-library-conversion.md (112 lines) - Enum attachment, XSS prevention
+2. test-conversion-guide.md (275 lines) - OPA5 class-based, QUnit, coverage
+3. conversion-checklist.md (196 lines) - Complete validation checklist
+
+**Integration Cards References**:
+1. chart-types-reference.md (181 lines) - 43 chart types with UIDs
+2. configuration-editor-advanced.md (236 lines) - Full Configuration Editor guide
+3. troubleshooting-guide.md (50 lines) - Detailed troubleshooting
+
+**Test Infrastructure (v2.1.0)**:
+- TypeScript ESM conversion (KISS & DRY)
+- Test coverage: 16 → 34 trigger tests
+- Triggering accuracy: 81.3% → 97.1%
+- Sample metrics system for analytics testing
+
 ## Anti-Patterns Avoided
 
 ✅ **NO** overlapping tool semantics  

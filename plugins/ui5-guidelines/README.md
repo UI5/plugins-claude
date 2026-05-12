@@ -1,8 +1,15 @@
 # UI5 Guidelines Plugin
 
-**Comprehensive UI5 development guidelines and best practices for Claude Code**
+**Version 2.1.0** | Comprehensive UI5 development guidelines and best practices for Claude Code
 
-This plugin provides expert-level guidance for SAP UI5 development, derived from official SAP MCP server documentation. It includes three specialized skills covering modern coding standards, TypeScript conversion, and Integration Cards development.
+This plugin provides expert-level guidance for SAP UI5 development, derived from official SAP documentation (UI5 1.136.7). It includes three specialized, version-aware skills covering modern coding standards, TypeScript conversion, and Integration Cards development.
+
+**Key Features**:
+- ✅ **Version-Aware**: Detects UI5 version, recommends appropriate patterns
+- ✅ **Type-Safe**: Full TypeScript support with ESM modules
+- ✅ **Well-Tested**: 97.1% triggering accuracy, 34 test cases
+- ✅ **Context-Optimized**: 11% reduction through progressive disclosure
+- ✅ **Production-Ready**: Battle-tested patterns from official SAP docs
 
 ## Features
 
@@ -149,14 +156,43 @@ These skills are derived from:
 - **ui5-typescript-conversion** - TypeScript conversion tools
 - **sap-fiori-tools** - Fiori application development
 
+## Testing & Quality
+
+This plugin includes comprehensive testing infrastructure:
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test suites
+npm run test:structure    # Plugin structure validation
+npm run test:triggering   # Skill triggering accuracy (97.1%)
+npm run test:performance  # Context budget checks
+
+# Test metrics with sample data
+npm run seed-metrics      # Load sample metrics
+npm run metrics           # View analytics dashboard
+npm run metrics:optimize  # Get optimization recommendations
+```
+
+**Test Coverage**:
+- **Structure**: 16/16 tests (100%)
+- **Triggering**: 33/34 tests (97.1%)
+- **Performance**: Context budget validation
+
+See [TESTING.md](TESTING.md) for complete testing guide.
+
 ## Version
 
-**Version**: 1.0.0  
+**Version**: 2.1.0  
 **Last Updated**: 2026-05-11  
+**UI5 Documentation Basis**: 1.136.7  
 **Compatible with**:
-- UI5 1.71.0+
+- UI5 1.71.0+ (version-aware patterns for 1.90.0+, 1.113.0+, 1.115.0+)
 - TypeScript 5.0+
 - CAP 6.0+
+
+**Changelog**: See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ## License
 

@@ -1,5 +1,80 @@
 # Changelog - UI5 Guidelines Plugin
 
+## [2.1.0] - 2026-05-11
+
+### Added - Phase 2 Enhancements
+
+#### Test Framework & Quality
+
+**TypeScript ESM Conversion**:
+- Full TypeScript conversion with strict mode
+- Native ESM modules (no CommonJS)
+- Type-safe test framework with interfaces
+- Source maps and declaration files
+- KISS & DRY principles applied
+
+**Expanded Test Coverage**:
+- Trigger tests: 16 → 34 test cases (+18 new)
+- Triggering accuracy: 81.3% → 97.1%
+- New test categories: Test Starter, OPA5, MetadataOptions, card types
+- Anti-pattern validation (Vue.js, Django, Angular)
+
+**Sample Metrics System**:
+- `test/fixtures/sample-metrics.jsonl` with 23 sample entries
+- `scripts/seed-metrics.ts` for testing analytics
+- npm scripts: `seed-metrics`, `metrics:week`, `metrics:month`
+
+#### Context Optimization
+
+**ui5-typescript-expert** (1,078 → 929 lines, -13.8%):
+- Extracted `references/control-library-conversion.md` (112 lines)
+- Extracted `references/test-conversion-guide.md` (275 lines)
+- Extracted `references/conversion-checklist.md` (196 lines)
+- Total references: 583 lines (on-demand loading)
+
+**ui5-integration-cards** (979 → 805 lines, -17.8%):
+- Extracted `references/configuration-editor-advanced.md` (236 lines)
+- Extracted `references/troubleshooting-guide.md` (50 lines)
+- Total references: 286 lines (on-demand loading)
+
+**Total Impact**:
+- Main context: 2,919 → 2,596 lines (-323 lines, -11.1%)
+- References (on-demand): 182 → 1,050 lines
+- All skills now under 930 lines
+
+### Changed
+
+**Skill Descriptions Enhanced**:
+- ui5-best-practices: Added version detection, XML event models, Test Starter keywords
+- ui5-typescript-expert: Added ts-interface-generator, ui5-tooling keywords
+- ui5-integration-cards: Added card type keywords
+
+**Test Infrastructure**:
+- Moved from JavaScript/CommonJS to TypeScript/ESM
+- Enhanced matching logic with phrase-specific scoring
+- Improved keyword weighting (keywords: 3, phrases: 10)
+
+**Documentation**:
+- IMPLEMENTATION_PLAN.md: Complete Phase 2 roadmap
+- TESTING.md: TypeScript test guide
+- QUICK_START_TESTING.md: Quick reference
+
+### Technical Details
+
+**Build System**:
+- TypeScript 5.6.0 with ES2022 target
+- Native ESM output
+- Strict mode enabled
+- Source maps + declarations
+
+**Test Results (Final)**:
+- Structure tests: 16/16 passing (100%)
+- Triggering tests: 33/34 passing (97.1%)
+- Performance tests: 6/7 passing, 6 warnings
+- **Overall**: 55/57 passing (96.5%)
+
+---
+
 ## [2.0.0] - 2026-05-11
 
 ### Added - Version-Specific Enhancements
