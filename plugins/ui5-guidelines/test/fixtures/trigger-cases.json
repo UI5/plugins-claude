@@ -177,6 +177,78 @@
       "expected_skill": null,
       "should_trigger": false,
       "reason": "Angular, not UI5"
+    },
+    {
+      "prompt": "Create a REST API with FastAPI",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Python FastAPI, not UI5"
+    },
+    {
+      "prompt": "SwiftUI data binding patterns",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "iOS SwiftUI, not UI5"
+    },
+    {
+      "prompt": "Kotlin coroutines best practices",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Kotlin, not UI5"
+    },
+    {
+      "prompt": "Next.js server components tutorial",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Next.js/React, not UI5"
+    },
+    {
+      "prompt": "Laravel Eloquent ORM queries",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "PHP Laravel, not UI5"
+    },
+    {
+      "prompt": "Rust async/await patterns",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Rust, not UI5"
+    },
+    {
+      "prompt": "Go channels and goroutines",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Go, not UI5"
+    },
+    {
+      "prompt": "What's the best way to structure UI5 controls when migrating from React?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "reason": "UI5 is the target, React mentioned contextually"
+    },
+    {
+      "prompt": "How do I use OData types in my UI5 application?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "reason": "OData types most relevant in UI5 context"
+    },
+    {
+      "prompt": "What's new in UI5 version 1.90.0?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "reason": "Version detection and IAsyncContentCreation (1.90.0)"
+    },
+    {
+      "prompt": "How to set up UI5 application with CAP OData backend integration?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "reason": "UI5 + CAP integration patterns"
+    },
+    {
+      "prompt": "Convert UI5 app from JavaScript to TypeScript with tests",
+      "expected_skill": "ui5-typescript-expert",
+      "should_trigger": true,
+      "reason": "Comprehensive TypeScript conversion including tests"
     }
   ]
 }
