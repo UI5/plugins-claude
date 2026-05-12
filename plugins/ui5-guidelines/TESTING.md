@@ -1,301 +1,182 @@
 # Testing & Metrics Guide
 
-## Consolidated Testing System
+The UI5 Guidelines plugin uses a unified test framework for structure validation, triggering tests, and performance checks.
 
-The UI5 Guidelines plugin uses a **unified test framework** that consolidates structure validation, triggering tests, performance checks, and telemetry into a single system.
-
----
-
-## Running Tests
-
-### Quick Start
+## Quick Start
 
 ```bash
-# Run all tests (from repository root)
+# Run all tests
 npm test
 
-# Or directly from plugin directory
-./test-plugin.sh
-
-# Or with Node.js
-node test/index.js
+# Specific test suites
+npm run test:structure      # Plugin structure validation
+npm run test:triggering     # Skill triggering accuracy
+npm run test:performance    # Context budget checks
 ```
-
-### Specific Test Suites
-
-```bash
-# Structure validation (plugin.json, SKILL.md frontmatter, links)
-npm run test:ui5-guidelines:structure
-
-# Triggering validation (keyword matching, skill selection)
-npm run test:ui5-guidelines:triggering
-
-# Performance checks (context budget, skill sizing)
-npm run test:ui5-guidelines:performance
-```
-
----
 
 ## Test Suites
 
-### 1. Structure Tests (`test/suites/structure.test.js`)
+### 1. Structure Tests
 
-Validates plugin structure and integrity:
-
-- ✅ `plugin.json` exists and is valid JSON
-- ✅ Plugin name is correct (`ui5-guidelines`)
+Validates plugin integrity:
+- ✅ `plugin.json` is valid JSON
 - ✅ All referenced skills exist
-- ✅ Each `SKILL.md` has proper YAML frontmatter
+- ✅ SKILL.md files have proper YAML frontmatter
 - ✅ No broken internal links
-- ✅ Version metadata present (warning if missing)
-- ✅ README exists (warning if missing)
 
-### 2. Triggering Tests (`test/suites/triggering.test.js`)
+### 2. Triggering Tests
 
-Validates that skills trigger on appropriate prompts:
+Validates skill selection accuracy:
+- Test cases defined in `test/fixtures/trigger-cases.json`
+- Checks skills trigger on appropriate prompts
+- Reports accuracy (target: >90%)
 
-- ✅ Skills match expected keywords
-- ✅ Skills don't trigger on irrelevant prompts
-- 📊 Reports triggering accuracy (target: >80%)
-
-Test cases are defined in [`test/fixtures/trigger-cases.json`](test/fixtures/trigger-cases.json).
-
-**Add new test cases** when:
+**Add test cases when**:
 - A skill doesn't trigger when expected
-- A skill triggers incorrectly on unrelated prompts
 - New triggering keywords are added
 
-### 3. Performance Tests (`test/suites/performance.test.js`)
+### 3. Performance Tests
 
-Validates context budget and efficiency:
+Validates context budget:
+- Main skill files under 900 lines (warning >700)
+- Total context reasonable (<3000 lines)
+- Large skills use reference files
 
-- ✅ Main skill files are under 900 lines (warning >700)
-- ✅ Total plugin context is reasonable (<3000 lines)
-- ✅ Large skills use reference files
-- ✅ Context budget is documented
+## Metrics
 
----
+### View Analytics
 
-## Telemetry & Metrics
+```bash
+# Load sample data (for testing)
+npm run seed-metrics
 
-### Overview
+# View dashboard
+npm run metrics              # Last 7 days
+npm run metrics:week         # Last 7 days
+npm run metrics:month        # Last 30 days
+npm run metrics:optimize     # With optimization tips
+```
 
-The plugin automatically tracks:
+### Tracked Data
+
+The plugin tracks (stored in `.metrics/usage.jsonl`, gitignored):
 - Skill invocations
-- Context size (lines & estimated tokens)
+- Context size (lines & tokens)
 - Session IDs
 - Timestamps
 
-Metrics are stored locally in `.metrics/usage.jsonl` (gitignored).
-
-### View Metrics Dashboard
-
-```bash
-# Last 7 days (default)
-npm run metrics
-
-# Last 30 days
-npm run metrics:month
-
-# With optimization recommendations
-npm run metrics:optimize
-```
-
-### Sample Output
+### Metrics Output
 
 ```
-📊 Skill Usage Metrics (Last 7 days)
+📊 UI5 Guidelines Plugin - Usage Analytics (Last 7 days)
 
-ui5-best-practices
-  Invocations: 15
-  Unique sessions: 3
-  Avg tokens per invocation: 3,440
-  Total estimated tokens: 51,600
-  Estimated cost: $0.1548
+Overall Stats:
+  Total sessions: 45
+  Total skill invocations: 128
+  Average context: 2,156 lines (~8,624 tokens)
 
-ui5-typescript-expert
-  Invocations: 8
-  Unique sessions: 2
-  Avg tokens per invocation: 4,312
-  Total estimated tokens: 34,496
-  Estimated cost: $0.1035
-
-📈 Summary:
-  Total invocations: 23
-  Total tokens: 86,096
-  Estimated total cost: $0.2583
+Per-Skill Breakdown:
+  ui5-best-practices: 48 invocations (37.5%)
+  ui5-typescript-expert: 42 invocations (32.8%)
+  ui5-integration-cards: 38 invocations (29.7%)
 ```
 
-### Optimization Recommendations
+## Test Configuration
 
-The analyzer automatically suggests optimizations:
+### Matching Algorithm
 
-- **[HIGH] Context Reduction**: Large skills detected (>3k tokens avg) → extract references
-- **[MEDIUM] Caching**: High-frequency skills → ensure prompt caching
-- **[LOW] Usage Analysis**: Low-usage skills → review triggering keywords
-
----
-
-## Manual Evaluation Tests
-
-For qualitative skill assessment, use reference test cases in [`test/evals/skill-evals.json`](test/evals/skill-evals.json).
-
-These are **not automated** — they serve as a checklist for manual testing with Claude Code.
-
-### Example Workflow
-
-1. Open Claude Code
-2. Select a test case from `skill-evals.json`
-3. Enter the prompt
-4. Verify expected behaviors listed in the test case
-5. Document issues or improvements needed
-
----
-
-## Adding New Tests
-
-### Add Triggering Test Case
-
-Edit [`test/fixtures/trigger-cases.json`](test/fixtures/trigger-cases.json):
+Configuration in `test/config/matching-config.json`:
 
 ```json
 {
-  "prompt": "Your test prompt here",
-  "expected_skill": "ui5-best-practices",
-  "should_trigger": true
+  "weights": {
+    "keywordMatch": 3,
+    "exactPhrase": 10,
+    "wordOverlap": 0.2
+  },
+  "ui5Terms": ["ui5", "sapui5", "openui5", ...],
+  "antiPatterns": ["react hook", "python", "django", ...],
+  "exactPhrases": ["component metadata", "minui5version"]
 }
 ```
 
-### Add Manual Evaluation Test
+**Tune weights** to adjust skill selection accuracy.
 
-Edit [`test/evals/skill-evals.json`](test/evals/skill-evals.json):
+## Adding Test Cases
+
+Edit `test/fixtures/trigger-cases.json`:
 
 ```json
 {
-  "id": "bp-004",
-  "skill": "ui5-best-practices",
-  "prompt": "Your test prompt",
-  "expected_behavior": [
-    "Behavior 1",
-    "Behavior 2"
+  "tests": [
+    {
+      "prompt": "How do I set up async module loading?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true
+    },
+    {
+      "prompt": "React hooks tutorial",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "React, not UI5"
+    }
   ]
 }
 ```
 
-### Add New Test Suite
+## Current Test Results
 
-1. Create `test/suites/your-suite.test.js`
-2. Export function: `module.exports = function(framework) { ... }`
-3. Use `framework.test()` for sync or `framework.testAsync()` for async tests
-4. Add to `test/index.js` imports and runner
-
----
-
-## Continuous Integration
-
-GitHub Actions automatically runs all tests on:
-- Push to `main` branch
-- Pull requests to `main`
-
-See [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) for configuration.
-
----
-
-## Test Framework API
-
-The shared test framework provides:
-
-```javascript
-const TestFramework = require('./lib/test-framework');
-const framework = new TestFramework(pluginRoot);
-
-// Sync test
-framework.test('test name', () => {
-  // Throws error on failure
-  // Returns true/undefined on success
-  // Returns 'warning' for non-critical issues
-});
-
-// Async test
-await framework.testAsync('async test', async () => {
-  await someAsyncOperation();
-});
-
-// Utilities
-const plugin = framework.loadPluginJson();
-const metadata = framework.loadSkillMetadata('skills/ui5-best-practices');
-const lines = framework.countLines('path/to/file');
-
-// Summary
-framework.printSummary(); // Returns true if all passed
-framework.exit();         // Exits with code 0 (pass) or 1 (fail)
-```
-
----
+**Structure**: 16/16 passing (100%)  
+**Triggering**: 45/46 passing (97.8%)  
+**Performance**: 6/7 passing
 
 ## Troubleshooting
 
-### Tests Fail with "Module not found"
+### Low Triggering Accuracy
 
-Ensure you're running from the correct directory:
+1. Add missing keywords to skill YAML frontmatter
+2. Update `test/config/matching-config.json` weights
+3. Add specific test cases
 
-```bash
-cd plugins/ui5-guidelines
-node test/index.js
+### Slow Tests
+
+1. Check test framework isn't loading unnecessary files
+2. Reduce number of test cases if needed
+3. Use `npm run test:triggering` for quick checks
+
+## Test Framework Details
+
+**Technology**: TypeScript ESM with strict mode
+
+**Structure**:
 ```
-
-Or use the repository root:
-
-```bash
-npm run test:ui5-guidelines
+test/
+├── index.ts                 # Test runner
+├── types.ts                 # Type definitions
+├── lib/
+│   └── test-framework.ts    # Core test framework
+├── suites/
+│   ├── structure.test.ts    # Structure validation
+│   ├── triggering.test.ts   # Triggering accuracy
+│   └── performance.test.ts  # Context budget
+├── config/
+│   ├── matching-config.json # Matching algorithm config
+│   └── matching-config.ts   # Config loader
+└── fixtures/
+    ├── trigger-cases.json   # Test cases
+    └── sample-metrics.jsonl # Sample analytics data
 ```
-
-### Metrics Not Appearing
-
-Metrics are collected on skill invocations in actual Claude Code usage. Test runs don't generate metrics.
-
-To populate metrics:
-1. Use the skills in Claude Code
-2. Run `npm run metrics` after usage
-
-### Triggering Tests Show Low Accuracy
-
-1. Review failed test cases in console output
-2. Update skill descriptions with missing keywords
-3. Add more specific triggering phrases to frontmatter
-4. Verify `Keywords:` line in YAML frontmatter
-
----
 
 ## Best Practices
 
-### When to Run Tests
+✅ **DO**:
+- Run tests before committing
+- Add test cases for new keywords
+- Keep test execution fast (<5s)
+- Use sample metrics for analytics testing
 
-- ✅ Before committing changes
-- ✅ After modifying skill content
-- ✅ After updating plugin.json
-- ✅ When adding new skills
-- ✅ In CI/CD (automatic)
-
-### Test-Driven Skill Development
-
-1. **Add test case first** (triggering or eval)
-2. **Run tests** — should fail
-3. **Update skill** to address test case
-4. **Run tests** — should pass
-5. **Review metrics** after real usage
-
-### Maintaining Test Quality
-
-- Keep trigger test cases realistic (actual user prompts)
-- Add test cases when bugs are found
-- Review and update eval cases quarterly
-- Monitor triggering accuracy trend over time
-
----
-
-## Related Documentation
-
-- [OPTIMIZATION_NOTES.md](OPTIMIZATION_NOTES.md) - Context budget tracking
-- [CHANGELOG.md](CHANGELOG.md) - Version history
-- [README.md](README.md) - Plugin overview
+❌ **DON'T**:
+- Modify test framework without understanding impact
+- Commit `.metrics/` directory (gitignored)
+- Skip tests when changing skill descriptions
+- Hardcode test expectations in code (use JSON)
