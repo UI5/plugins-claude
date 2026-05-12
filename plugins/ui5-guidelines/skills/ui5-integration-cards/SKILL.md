@@ -53,60 +53,49 @@ This skill provides comprehensive guidance for developing SAP UI Integration Car
 
 ## 2. Data Configuration (CRITICAL)
 
-### 2.1 Data Location Rules
+**Overview**: Card data must be configured at `sap.card.data` level, never in content or header sections.
+
+### Essential Rules
 
 **Primary data location**:
 ```json
 {
     "sap.card": {
         "data": {
-            // ✅ ALWAYS place data configuration here
+            // ✅ ALWAYS place data here
         }
     }
 }
 ```
 
-**NEVER place data configuration in**:
-```json
-{
-    "sap.card": {
-        "content": {
-            "data": {}  // ❌ WRONG
-        },
-        "header": {
-            "data": {}  // ❌ WRONG
-        }
-    }
-}
-```
+**Never place data in**:
+- `sap.card.content.data` ❌
+- `sap.card.header.data` ❌
 
-### 2.2 Data Sources
+### Quick Examples
 
-#### Inline JSON
+**Inline JSON**:
 ```json
 {
     "sap.card": {
         "data": {
             "json": {
-                "products": [
-                    {"name": "Product 1", "price": 100},
-                    {"name": "Product 2", "price": 200}
-                ]
+                "products": [{"name": "Product 1", "price": 100}]
             }
         }
     }
 }
 ```
 
-#### Network Request
+**Network Request**:
 ```json
 {
     "sap.card": {
         "data": {
             "request": {
-                "url": "https://services.odata.org/V4/Northwind/Northwind.svc/Products",
+                "url": "https://api.example.com/data",
                 "parameters": {
-                    "$select": "ProductID,ProductName,UnitPrice",
+                    "$select": "id,name",
                     "$top": "10"
                 }
             }
@@ -115,430 +104,125 @@ This skill provides comprehensive guidance for developing SAP UI Integration Car
 }
 ```
 
-#### Destination (Recommended for Enterprise)
+**Destination (Recommended)**:
 ```json
 {
     "sap.card": {
         "configuration": {
             "destinations": {
-                "northwind": {
-                    "name": "Northwind_V4",
-                    "defaultUrl": "https://services.odata.org/V4/Northwind/Northwind.svc"
+                "myDest": {
+                    "name": "MyDestination",
+                    "defaultUrl": "https://api.example.com"
                 }
             }
         },
         "data": {
             "request": {
-                "url": "{{destinations.northwind}}/Products",
-                "parameters": {
-                    "$select": "ProductID,ProductName",
-                    "$top": "{parameters>/maxItems/value}"
-                }
+                "url": "{{destinations.myDest}}/endpoint"
             }
         }
     }
 }
 ```
 
-**NEVER replace destination name with URL**:
-```json
-// ❌ WRONG
-"url": "https://services.odata.org/..."
+### Complete Guide
 
-// ✅ CORRECT
-"url": "{{destinations.northwind}}/Products"
-```
-
-### 2.3 Data Paths
-
-**ALWAYS verify paths are correctly set**:
-
-```json
-{
-    "sap.card": {
-        "data": {
-            "request": {
-                "url": "..."
-            },
-            "path": "/value"  // ✅ Primary data path
-        },
-        "content": {
-            "data": {
-                "path": "/items"  // ⚠️ Overrides primary path for content
-            },
-            "item": {
-                "title": "{ProductName}"
-            }
-        }
-    }
-}
-```
-
-**Common mistake**: Setting content data path when not needed, causing "No data to display" errors.
-
-### 2.4 Parameter Binding
-
-**ALWAYS use correct parameter syntax**:
-
-```json
-{
-    "sap.card": {
-        "configuration": {
-            "parameters": {
-                "maxItems": {
-                    "value": 5
-                }
-            }
-        },
-        "data": {
-            "request": {
-                "url": "...",
-                "parameters": {
-                    "$top": "{parameters>/maxItems/value}"  // ✅ Correct
-                }
-            }
-        }
-    }
-}
-```
-
-Pattern: `{parameters>/parameterKey/value}`
+For comprehensive data configuration patterns including path overriding, parameter binding, extension data sources, and troubleshooting, see [references/data-configuration-patterns.md](references/data-configuration-patterns.md).
 
 ---
 
 ## 3. Card Types
 
-### 3.1 List Card
+**Overview**: Six main card types available - List, Table, Calendar, Timeline, Object, and Analytical. Choose based on data structure and user needs.
+
+### Quick Reference
+
+| Type | Use Case | Key Properties |
+|------|----------|----------------|
+| List | Item collections | `items`, `item.title/description` |
+| Table | Tabular data | `columns`, `row` |
+| Calendar | Date-based events | `item.start/end`, date ranges |
+| Timeline | Chronological | `item.dateTime`, temporal ordering |
+| Object | Single entity | Multiple groups, detailed view |
+| Analytical | Charts/Visualizations | measures, dimensions, feeds |
+
+### Essential List Card Example
 
 ```json
 {
     "sap.card": {
         "type": "List",
         "header": {
-            "title": "{i18n>cardTitle}",
-            "icon": {
-                "src": "sap-icon://product"
-            }
+            "title": "Products"
         },
         "content": {
-            "data": {
+            "items": {
                 "path": "/products"
             },
             "item": {
                 "title": "{name}",
                 "description": "{description}",
                 "info": {
-                    "value": "{price} EUR"
-                },
-                "actions": [
-                    {
-                        "type": "Navigation",
-                        "parameters": {
-                            "url": "/products/{id}"
-                        }
-                    }
-                ]
-            }
-        }
-    }
-}
-```
-
-### 3.2 Table Card
-
-```json
-{
-    "sap.card": {
-        "type": "Table",
-        "header": {
-            "title": "Sales Data"
-        },
-        "content": {
-            "data": {
-                "path": "/sales"
-            },
-            "row": {
-                "columns": [
-                    {
-                        "title": "Product",
-                        "value": "{product}",
-                        "identifier": true
-                    },
-                    {
-                        "title": "Revenue",
-                        "value": "{revenue}",
-                        "state": "{= ${revenue} > 1000 ? 'Success' : 'Warning' }"
-                    }
-                ]
-            }
-        }
-    }
-}
-```
-
-### 3.3 Object Card
-
-```json
-{
-    "sap.card": {
-        "type": "Object",
-        "header": {
-            "title": "Customer Details"
-        },
-        "content": {
-            "groups": [
-                {
-                    "title": "Contact Information",
-                    "items": [
-                        {
-                            "label": "Name",
-                            "value": "{name}"
-                        },
-                        {
-                            "label": "Email",
-                            "value": "{email}",
-                            "actions": [
-                                {
-                                    "type": "Navigation",
-                                    "parameters": {
-                                        "url": "mailto:{email}"
-                                    }
-                                }
-                            ]
-                        }
-                    ]
+                    "value": "{price}"
                 }
+            }
+        }
+    }
+}
+```
+
+### Complete Examples
+
+For complete manifest examples of all six card types including Table (columns/rows), Calendar (date formatting), Timeline (icons), Object (groups), and advanced patterns, see [references/card-types-examples.md](references/card-types-examples.md).
+
+---
+
+## 4. Analytical Cards (Comprehensive)
+
+**Overview**: Analytical cards display data visualizations using 43+ chart types. Critical: feed UIDs must match chart type exactly.
+
+### Essential Structure
+
+```json
+{
+    "sap.card": {
+        "type": "Analytical",
+        "content": {
+            "chartType": "donut",
+            "legend": { "visible": true },
+            "plotArea": { "dataLabel": { "visible": true } },
+            "title": { "text": "Sales by Region" },
+            "measureAxis": "valueAxis",
+            "dimensionAxis": "categoryAxis",
+            "measures": [
+                { "name": "Revenue", "value": "{revenue}" }
+            ],
+            "dimensions": [
+                { "name": "Region", "value": "{region}" }
+            ],
+            "feeds": [
+                { "uid": "size", "type": "Measure", "values": ["Revenue"] },
+                { "uid": "color", "type": "Dimension", "values": ["Region"] }
             ]
         }
     }
 }
 ```
 
----
+### Feed UID Quick Reference
 
-## 4. Analytical Cards (Comprehensive)
+| Chart Type | Measure UIDs | Dimension UIDs |
+|------------|-------------|----------------|
+| donut | size | color |
+| column | valueAxis | categoryAxis |
+| line | valueAxis | categoryAxis, color (optional) |
+| bar | valueAxis | categoryAxis |
 
-### 4.1 Critical Configuration Elements
+### Complete Reference
 
-**ALWAYS configure these exactly**:
-
-1. `chartType`: The visualization type
-2. `measures`: Quantitative values (numbers)
-3. `dimensions`: Qualitative categories (labels)
-4. `feeds`: Maps measures/dimensions to chart UIDs
-
-### 4.2 Anatomy of Analytical Card
-
-```json
-{
-    "sap.card": {
-        "type": "Analytical",
-        "header": {
-            "title": "Revenue by Region"
-        },
-        "content": {
-            "chartType": "column",
-            "data": {
-                "path": "/revenues"
-            },
-            "dimensions": [
-                {
-                    "name": "Region",
-                    "value": "{region}"
-                }
-            ],
-            "measures": [
-                {
-                    "name": "Revenue",
-                    "value": "{revenue}"
-                }
-            ],
-            "feeds": [
-                {
-                    "type": "Dimension",
-                    "uid": "categoryAxis",
-                    "values": ["Region"]
-                },
-                {
-                    "type": "Measure",
-                    "uid": "valueAxis",
-                    "values": ["Revenue"]
-                }
-            ],
-            "chartProperties": {
-                "title": {
-                    "text": "Revenue Analysis"
-                },
-                "legend": {
-                    "visible": true
-                }
-            }
-        }
-    }
-}
-```
-
-### 4.3 Chart Types and UIDs (Complete Reference)
-
-**CRITICAL**: `uid` in feeds must **exactly match** required UIDs for the chart type.
-
-#### Column/Bar Charts
-
-**column** - Vertical bars
-- UIDs: `categoryAxis`, `valueAxis`, `color` (optional)
-```json
-{
-    "chartType": "column",
-    "feeds": [
-        {"type": "Dimension", "uid": "categoryAxis", "values": ["Month"]},
-        {"type": "Measure", "uid": "valueAxis", "values": ["Revenue"]}
-    ]
-}
-```
-
-**bar** - Horizontal bars
-- UIDs: `categoryAxis`, `valueAxis`, `color` (optional)
-
-**stacked_column** / **stacked_bar** - Stacked visualizations
-- UIDs: `categoryAxis`, `valueAxis`, `color`
-
-**dual_column** / **dual_bar** - Two value axes
-- UIDs: `categoryAxis`, `valueAxis`, `valueAxis2`
-
-#### Line Charts
-
-**line** - Basic line chart
-- UIDs: `categoryAxis`, `valueAxis`, `color` (optional)
-
-**timeseries_line** - Time-based line
-- UIDs: `timeAxis`, `valueAxis`, `color` (optional)
-```json
-{
-    "chartType": "timeseries_line",
-    "dimensions": [
-        {
-            "name": "Date",
-            "value": "{date}",
-            "dataType": "date"  // ✅ Required for timeseries
-        }
-    ],
-    "feeds": [
-        {"type": "Dimension", "uid": "timeAxis", "values": ["Date"]},
-        {"type": "Measure", "uid": "valueAxis", "values": ["Sales"]}
-    ]
-}
-```
-
-#### Pie/Donut Charts
-
-**donut** / **pie**
-- UIDs: `size`, `color`
-```json
-{
-    "chartType": "donut",
-    "feeds": [
-        {"type": "Measure", "uid": "size", "values": ["Revenue"]},
-        {"type": "Dimension", "uid": "color", "values": ["Category"]}
-    ]
-}
-```
-
-#### Bubble/Scatter Charts
-
-**bubble**
-- UIDs: `valueAxis`, `valueAxis2` (optional), `bubbleWidth`, `color`
-```json
-{
-    "chartType": "bubble",
-    "measures": [
-        {"name": "Sales", "value": "{sales}"},
-        {"name": "Profit", "value": "{profit}"},
-        {"name": "Size", "value": "{size}"}
-    ],
-    "feeds": [
-        {"type": "Measure", "uid": "valueAxis", "values": ["Sales"]},
-        {"type": "Measure", "uid": "valueAxis2", "values": ["Profit"]},
-        {"type": "Measure", "uid": "bubbleWidth", "values": ["Size"]},
-        {"type": "Dimension", "uid": "color", "values": ["Region"]}
-    ]
-}
-```
-
-**scatter**
-- UIDs: `valueAxis`, `valueAxis2`, `color` (optional)
-
-#### Specialty Charts
-
-**heatmap**
-- UIDs: `categoryAxis`, `categoryAxis2`, `color`
-```json
-{
-    "chartType": "heatmap",
-    "dimensions": [
-        {"name": "Location", "value": "{location}"},
-        {"name": "Product", "value": "{product}"}
-    ],
-    "measures": [
-        {"name": "Temperature", "value": "{temp}"}
-    ],
-    "feeds": [
-        {"type": "Dimension", "uid": "categoryAxis", "values": ["Location"]},
-        {"type": "Dimension", "uid": "categoryAxis2", "values": ["Product"]},
-        {"type": "Measure", "uid": "color", "values": ["Temperature"]}
-    ]
-}
-```
-
-**treemap**
-- UIDs: `title`, `color`, `weight`
-
-**waterfall**
-- UIDs: `categoryAxis`, `valueAxis`, `waterfallType` (optional)
-
-**bullet** / **vertical_bullet**
-- UIDs: `categoryAxis`, `actualValues`, `targetValues` (optional), `additionalValues` (optional)
-
-### 4.4 Chart Properties
-
-Customize appearance with `chartProperties`:
-
-```json
-{
-    "content": {
-        "chartProperties": {
-            "title": {
-                "text": "Revenue Trends",
-                "alignment": "center"
-            },
-            "legend": {
-                "visible": true,
-                "position": "bottom"
-            },
-            "plotArea": {
-                "dataLabel": {
-                    "visible": true,
-                    "showTotal": true
-                }
-            },
-            "valueAxis": {
-                "title": {
-                    "text": "Revenue (EUR)"
-                },
-                "label": {
-                    "formatString": "#,##0"
-                }
-            },
-            "categoryAxis": {
-                "title": {
-                    "text": "Month"
-                }
-            }
-        }
-    }
-}
-```
-
----
+For all 43 chart types with exact feed UIDs, advanced chart properties (dual axes, time axes, trends), VizProperties customization, and troubleshooting "No data" errors, see:
+- [references/analytical-cards-comprehensive.md](references/analytical-cards-comprehensive.md)
+- [references/chart-types-reference.md](references/chart-types-reference.md)
 
 ---
 
