@@ -9,7 +9,10 @@
     "test:structure": "npm run build && node dist/test/index.js --suite structure",
     "test:triggering": "npm run build && node dist/test/index.js --suite triggering",
     "test:performance": "npm run build && node dist/test/index.js --suite performance",
+    "seed-metrics": "npm run build && node dist/scripts/seed-metrics.js",
     "metrics": "npm run build && node dist/scripts/analyze.js",
+    "metrics:week": "npm run build && node dist/scripts/analyze.js --days 7",
+    "metrics:month": "npm run build && node dist/scripts/analyze.js --days 30",
     "metrics:optimize": "npm run build && node dist/scripts/analyze.js --optimize"
   },
   "devDependencies": {

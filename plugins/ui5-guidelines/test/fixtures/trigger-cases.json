@@ -84,6 +84,99 @@
       "expected_skill": null,
       "should_trigger": false,
       "reason": "Not UI5-related"
+    },
+    {
+      "prompt": "How to use Test Starter in UI5 1.113+?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true
+    },
+    {
+      "prompt": "What are the XML event handler special models in UI5?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Show me $parameters and $event usage in XML views",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Component metadata configuration with minUI5Version",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true
+    },
+    {
+      "prompt": "OPA5 test conversion to TypeScript class-based pattern",
+      "expected_skill": "ui5-typescript-expert",
+      "should_trigger": true
+    },
+    {
+      "prompt": "MetadataOptions interface for custom UI5 control",
+      "expected_skill": "ui5-typescript-expert",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Enum attachment to global library object in UI5",
+      "expected_skill": "ui5-typescript-expert",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Configure ui5-tooling-transpile for TypeScript",
+      "expected_skill": "ui5-typescript-expert",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Table card with dynamic columns in Integration Cards",
+      "expected_skill": "ui5-integration-cards",
+      "should_trigger": true
+    },
+    {
+      "prompt": "List card with navigation actions",
+      "expected_skill": "ui5-integration-cards",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Calendar card date formatting",
+      "expected_skill": "ui5-integration-cards",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Object card with multiple groups",
+      "expected_skill": "ui5-integration-cards",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Analytical card measures and dimensions setup",
+      "expected_skill": "ui5-integration-cards",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Card destination configuration with parameters",
+      "expected_skill": "ui5-integration-cards",
+      "should_trigger": true
+    },
+    {
+      "prompt": "Timeline card with icon and description",
+      "expected_skill": "ui5-integration-cards",
+      "should_trigger": true
+    },
+    {
+      "prompt": "How to implement Vue.js components?",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Vue.js, not UI5"
+    },
+    {
+      "prompt": "Django REST framework serializers",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Django, not UI5"
+    },
+    {
+      "prompt": "Angular dependency injection",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Angular, not UI5"
     }
   ]
 }
