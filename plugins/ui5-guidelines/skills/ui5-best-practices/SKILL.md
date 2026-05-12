@@ -402,89 +402,29 @@ const oButton = new Button({
 
 ## 11. XML Event Handling Patterns
 
-### Event Handler Addressing
+**Overview**: UI5 XML views support sophisticated event handler binding with parameter passing, special named models ($parameters, $source, $event, $controller), and context control.
 
-**Dot Notation (Controller Methods)**
+### Essential Patterns
+
+**Dot Notation for Controller Methods**:
 ```xml
-<!-- ✅ Relative to controller -->
 <Button text="Save" press=".onSave"/>
 ```
-The leading dot means: `attachPress(oController["onSave"], oController)`
 
-**core:require Modules**
+**Parameter Passing**:
 ```xml
-<Button core:require="{Util: 'my/app/util/Util'}"
-        text="Process"
-        press="Util.handleProcess"/>
+<Button press=".doSomething(${/productId}, ${view>/mode}, $event)"/>
 ```
 
-**AVOID**: Global function names (legacy, not recommended)
+**Special Models**:
+- `$parameters` - Access event parameters
+- `$source` - Access the event source control  
+- `$event` - Reference the event object
+- `$controller` - Access controller properties
 
-### Passing Parameters to Event Handlers
+### Complete Guide
 
-**JavaScript Literals**
-```xml
-<Button press=".doSomething('string', 0, 5.5, {key1: 'value1'}, ['val1', 'val2'])"/>
-```
-
-**Model Property Access**
-```xml
-<!-- Binding syntax: ${...} -->
-<Button press=".onItemClick(${products>unitPrice})"/>
-```
-
-**Expression Binding**
-```xml
-<Button press=".doCheck(${products>type} === 'Laptop')"/>
-<Button press=".format(10 * ${products>unitPrice})"/>
-<Button press=".onPrice(${path: 'price', formatter: '.formatPrice'})"/>
-```
-
-### Special Named Models
-
-#### $parameters - Event Parameters
-```xml
-<Select change=".onChange(${$parameters>/selectedItem})"/>
-```
-Access event parameters without the event object.
-
-#### $source - Control Firing Event
-```xml
-<Button press=".onPress(${$source>/text})"/>
-```
-Wraps the control as a `ManagedObjectModel`.
-
-#### $event - Original Event Object
-```xml
-<Button press=".onPress($event)"/>
-```
-Explicitly pass event object when parameters are specified.
-
-#### $controller - Controller Reference
-```xml
-<!-- For handlers NOT in controller -->
-<Button core:require="{Helper: 'my/app/Helper'}"
-        press="Helper.doSomething($controller)"/>
-```
-
-### The "this" Context Rules
-
-**Without parameters**: `this` is always the controller
-```xml
-<Button press=".doSomething"/>  <!-- this = controller -->
-```
-
-**With parameters**: `this` is the object owning the handler
-```xml
-<Button press=".doSomething('param')"/>  <!-- this = controller -->
-<Button core:require="{Util: 'util'}" press="Util.handle('p')"/>  <!-- this = Util -->
-```
-
-**Override context with .call()**
-```xml
-<Button core:require="{Helper: 'helper'}"
-        press="Helper.doSomething.call($controller, 'Hello')"/>
-```
+For comprehensive XML event patterns including core:require, JavaScript literals, model property access, "this" context control with .call(), and complex examples, see [references/xml-event-handling-guide.md](references/xml-event-handling-guide.md).
 
 ## 12. Component Metadata for UI5 Version Detection
 
@@ -571,205 +511,66 @@ public static metadata = {
 
 ## 13. Content Security Policy (CSP) - Directive Reference
 
-### Required CSP Directives for UI5 (Version 1.136.7)
+**Overview**: CSP protects against XSS by controlling resource sources. UI5 applications must configure specific directives for framework libraries.
 
-**Minimal Restrictive Policy**
-```
-Content-Security-Policy:
-  script-src 'self' <ui5-cdn>;
-  style-src 'self' <ui5-cdn>;
-  img-src 'self' data: blob: <ui5-cdn>;
-  font-src 'self' data: <ui5-cdn>;
-  connect-src 'self' <backend-api>;
-  frame-src 'self' data: blob:;
-  worker-src 'self' data: blob:;
-```
+### Essential Directives
 
-### Directive Breakdown
+| Directive | Purpose | Required Values |
+|-----------|---------|----------------|
+| `script-src` | JavaScript sources | `'self'`, `'unsafe-eval'` (for some libs) |
+| `style-src` | CSS sources | `'self'`, `'unsafe-inline'` (for theming) |
+| `font-src` | Font sources | `'self'`, `data:` |
+| `img-src` | Image sources | `'self'`, `https:`, `data:` |
 
-#### script-src
-- **'self'** - Application resources
-- **&lt;ui5-cdn&gt;** - UI5 framework source
-- **'unsafe-eval'** - Required ONLY for:
-  - Synchronous loading (deprecated, avoid)
-  - Legacy libraries: `sap.ca.ui`, `sap.makit`, `sap.me`, `sap.ui.commons`, `sap.ui.ux3`, `sap.uiext.inbox`, `sap.viz.*`, `sap.zen.*`
-  - Partially required: `sap.apf`, `sap.ovp`, `sap.ushell`, `sap.rules.ui`
+### Quick Example
 
-#### style-src
-- **'self'** - Application styles
-- **&lt;ui5-cdn&gt;** - UI5 themes
-- **'unsafe-inline'** - Required for:
-  - Same legacy libraries as script-src
-  - Controls with inline styles: `sap.m.FormattedText`, `sap.ui.core.HTML`
-  - Partially required: `sap.gantt`, `sap.ui.vk`, `sap.ushell`
-
-#### img-src, font-src
-- **data:** - Inline images/fonts (UI5 features)
-- **blob:** - Dynamically generated content
-
-#### worker-src / child-src
-- Required for UI5 web workers
-- **blob:** may be needed for specific functionality
-
-#### connect-src
-- **'self'** - Application APIs
-- **&lt;backend-api&gt;** - OData services, REST endpoints
-- **wss:** - WebSocket connections (specific features)
-
-### Testing CSP Policies
-
-**Report-Only Mode** (Recommended for testing)
-```
-Content-Security-Policy-Report-Only:
-  script-src 'self';
-  style-src 'self';
-  report-uri /csp-violation-report;
+```html
+<meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'">
 ```
 
-1. Start with most restrictive policy
-2. Monitor violation reports
-3. Add required sources iteratively
-4. Switch to enforce mode once stable
+### Complete Reference
 
-### CSP Compliance Dos and Don'ts
-
-**DO**:
-- ✅ Use external stylesheets (no inline styles)
-- ✅ Use async loading (`data-sap-ui-async="true"`)
-- ✅ Leverage library preloads
-- ✅ Use `ComponentSupport` for initialization
-
-**DON'T**:
-- ❌ Use `<script>` with inline code
-- ❌ Use inline event handlers (`onclick="..."`)
-- ❌ Use `javascript:` URLs
-- ❌ Use `document.write()` or `createElement('script')` for inline scripts
-- ❌ Use `eval()`, `new Function()`, `setTimeout(<string>)`
-
-### Library-Specific CSP Issues
-
-**sap.ui.richtexteditor**
-- Requires `script-src 'unsafe-inline'` for plugins: `linkchecker`, `preview`
-
-**sap.ui.core (Hyphenation)**
-- Requires `script-src 'wasm-unsafe-eval'` for WebAssembly
-
-**sap.ushell**
-- Requires `script-src 'unsafe-eval'` for App Finder and custom tiles
+For the full directive table, library-specific requirements (sap.ui.richtexteditor, sap.ushell), Report-Only testing workflow, and compliance checklist, see [references/csp-directive-reference.md](references/csp-directive-reference.md).
 
 ## 14. Modern Test Setup (Test Starter)
 
-### Overview
+**Overview**: Test Starter (UI5 >= 1.113.0) provides a modern test orchestration pattern with testsuite.qunit.html/js, individual test files, and optional code coverage.
 
-UI5 Test Starter simplifies QUnit/OPA5 test orchestration for UI5 1.136.7+:
+### Essential Structure
 
-**Benefits**:
-- Reduces boilerplate code
-- Ensures async loading of testing frameworks
-- CSP-compliant test setup
-- Centralized configuration
-
-### Test Suite Structure
-
-**testsuite.qunit.html**
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Test Suite for my.app</title>
-    <script src="../resources/sap/ui/qunit/qunit-redirect.js"></script>
-</head>
-<body></body>
-</html>
+```
+webapp/test/
+├── testsuite.qunit.html       # Entry point
+├── testsuite.qunit.js          # Test suite configuration
+└── unit/
+    ├── AllTests.js             # Test registry
+    └── controller/
+        └── Main.controller.test.js
 ```
 
-**testsuite.qunit.js**
+### Quick Example (testsuite.qunit.js)
+
 ```javascript
-window.suite = function() {
-    const suite = new parent.jsUnitTestSuite();
-    const contextPath = location.pathname.substring(0, location.pathname.lastIndexOf("/") + 1);
-
-    suite.addTestPage(contextPath + "unit/unitTests.qunit.html");
-    suite.addTestPage(contextPath + "integration/opaTests.qunit.html");
-
-    return suite;
-};
-```
-
-### Individual Test Files
-
-**unit/unitTests.qunit.html**
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Unit Tests</title>
-    <script
-        id="sap-ui-bootstrap"
-        src="../../resources/sap-ui-core.js"
-        data-sap-ui-resource-roots='{"my.app": "../../"}'
-        data-sap-ui-async="true">
-    </script>
-    <script src="unitTests.qunit.js"></script>
-</head>
-<body><div id="qunit"></div></body>
-</html>
-```
-
-**unit/unitTests.qunit.js**
-```javascript
-sap.ui.require([
-    "sap/ui/test/Opa5",
-    "sap/ui/qunit/utils/createAndAppendDiv",
-    "my/app/test/unit/model/formatter"
-], function(Opa5, createAndAppendDiv) {
+sap.ui.define(function() {
     "use strict";
-    
-    createAndAppendDiv("content");
-    
-    QUnit.start();
+    return {
+        name: "QUnit test suite",
+        defaults: {
+            page: "ui5://test-resources/{name}.qunit.html"
+        },
+        tests: {
+            "unit/AllTests": {
+                title: "Unit Tests"
+            }
+        }
+    };
 });
 ```
 
-### Configuration Options
+### Complete Guide
 
-**QUnit Version**
-```javascript
-// In test HTML
-<script src="../../resources/sap/ui/thirdparty/qunit-2.js"></script>
-```
-
-**Sinon.JS Version**
-```javascript
-// In test HTML
-<script src="../../resources/sap/ui/thirdparty/sinon-4.js"></script>
-```
-
-**Coverage (Istanbul)**
-```javascript
-// In test HTML (UI5 >= 1.113)
-<script src="../../resources/sap/ui/qunit/qunit-coverage-istanbul.js"></script>
-```
-
-### Migration from Legacy Setup
-
-**Before (Legacy)**
-```javascript
-jQuery.sap.require("sap.ui.qunit.qunit-css");
-jQuery.sap.require("sap.ui.thirdparty.qunit");
-jQuery.sap.require("sap.ui.qunit.qunit-junit");
-```
-
-**After (Test Starter)**
-```javascript
-// No manual requires - handled by test starter
-sap.ui.require([
-    "my/app/test/unit/AllTests"
-], function() {
-    QUnit.start();
-});
-```
+For full Test Starter patterns, QUnit 2+ configuration, Istanbul code coverage setup (UI5 >= 1.113.0), and migration from legacy test setup, see [references/test-starter-guide.md](references/test-starter-guide.md).
 
 ## 15. Validation Checklist
 
