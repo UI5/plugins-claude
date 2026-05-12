@@ -217,210 +217,59 @@ export default tseslint.config(
 
 ## 3. Application Code Conversion
 
-### 3.1 Convert UI5 Class to ES6 Class
+**Quick Reference**: Convert controllers to ES6 classes with typed event handlers, add IAsyncContentCreation to Component.ts (UI5 >= 1.90.0), and use pure functions with explicit return types for formatters.
 
-Before:
-```javascript
-sap.ui.define(["sap/ui/core/mvc/Controller"], function (Controller) {
-    var App = Controller.extend("ui5app.controller.App", {
-        onInit: function() {
-            // ...
-        }
-    });
-    return App;
-});
-```
+### Essential Controller Pattern
 
-After:
 ```typescript
 import Controller from "sap/ui/core/mvc/Controller";
-
-/**
- * @namespace ui5app.controller
- */
-export default class App extends Controller {
-    public onInit(): void {
-        // ...
-    }
-}
-```
-
-**Key Changes**:
-- `extend()` → ES6 `class`
-- Add `@namespace` JSDoc (required for transformer)
-- Methods become class methods
-- `return` → `export default`
-
-### 3.2 Convert to ES Modules
-
-Before:
-```javascript
-sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/m/MessageBox"
-], function (Controller, MessageBox) {
-    // ...
-});
-```
-
-After:
-```typescript
-import Controller from "sap/ui/core/mvc/Controller";
-import MessageBox from "sap/m/MessageBox";
-// ...
-export default class MyController extends Controller {
-    // ...
-}
-```
-
-#### Dynamic Imports
-
-Before:
-```javascript
-sap.ui.require(["sap/m/MessageBox"], function(MessageBox) {
-    MessageBox.show("Hello");
-});
-```
-
-After:
-```typescript
-import("sap/m/MessageBox").then((MessageBox) => {
-    MessageBox.default.show("Hello");
-});
-```
-
-### 3.3 Type Annotations
-
-Add types to parameters and return values:
-
-```typescript
-import Button from "sap/m/Button";
 import { Button$PressEvent } from "sap/m/Button";
+import AppComponent from "../Component";
 
 export default class Main extends Controller {
     public onPress(event: Button$PressEvent): void {
-        const button = event.getSource() as Button;
-        // ...
+        const button = event.getSource();
+        // Typed as Button
     }
     
-    private calculateTotal(items: number[]): number {
-        return items.reduce((sum, item) => sum + item, 0);
+    public getOwnerComponent(): AppComponent {
+        return super.getOwnerComponent() as AppComponent;
     }
 }
 ```
 
-**Key Rules**:
-- Use UI5 control events (e.g., `Button$PressEvent`), not browser events
-- Import types from UI5 modules, not global namespace (`Button`, not `sap.m.Button`)
-- Add member variables to class if created on-the-fly in JS
-
-### 3.4 Casts for Generic Methods
-
-Generic methods return supertypes; cast to specific types:
+### Essential Component Pattern (UI5 >= 1.90.0)
 
 ```typescript
-// ❌ WRONG - Returns sap.ui.core.Element
-this.byId("myInput").setValue("text");  // Error: setValue doesn't exist
+import UIComponent from "sap/ui/core/UIComponent";
 
-// ✅ CORRECT - Cast to specific type
-import Input from "sap/m/Input";
-(this.byId("myInput") as Input).setValue("text");
-
-// ✅ CORRECT - Cast getOwnerComponent
-import AppComponent from "../Component";
-(this.getOwnerComponent() as AppComponent).getRouter();
-
-// ✅ CORRECT - Cast getModel
-import ODataModel from "sap/ui/model/odata/v4/ODataModel";
-(this.getView().getModel() as ODataModel).refresh();
+export default class Component extends UIComponent implements IAsyncContentCreation {
+    public async init(): Promise<void> {
+        super.init();
+        // Async initialization
+    }
+}
 ```
 
-**Common Generic Methods**:
-- `this.byId()`
-- `this.getOwnerComponent()`
-- `this.getView().getModel()`
-- `event.getSource()`
+### Complete Guide
+
+For comprehensive application code conversion including:
+- Controller conversion patterns
+- Component.ts with IAsyncContentCreation
+- Formatter conversion
+- Model initialization
+- Event handler typing
+- Router integration
+
+See [references/application-code-conversion.md](references/application-code-conversion.md).
 
 ---
 
 ## 4. Custom Control Conversion (CRITICAL)
 
-### 4.1 The Runtime-Generated Methods Problem
+**Quick Reference**: Convert custom controls to ES6 classes with typed MetadataOptions, preserve renderer logic, and use proper event parameter types.
 
-**CRITICAL CONCEPT**: UI5 generates getter/setter methods for properties, aggregations, associations, and events at **runtime**. TypeScript cannot see these methods at development time.
-
-#### The Problem
-
-```typescript
-// Metadata defines property
-static readonly metadata: MetadataOptions = {
-    properties: {
-        "text": "string"
-    }
-};
-
-// TypeScript errors:
-control.getText();   // ❌ Property 'getText' does not exist
-control.setText("Hello");  // ❌ Property 'setText' does not exist
-new MyControl("id", {text: "Hello"});  // ❌ No constructor signature
-```
-
-#### The Solution: @ui5/ts-interface-generator
-
-Install the tool:
-
-```bash
-npm install --save-dev @ui5/ts-interface-generator@latest
-```
-
-Add script to `package.json`:
-
-```json
-{
-    "scripts": {
-        "watch:controls": "npx @ui5/ts-interface-generator --watch"
-    }
-}
-```
-
-Run after converting controls:
-
-```bash
-npm run watch:controls
-```
-
-This generates `*.gen.d.ts` files with all runtime methods. **Commit these files** to version control.
-
-### 4.2 Required Constructor Signatures (MANUAL STEP)
-
-**CRITICAL**: After running the interface generator, **manually copy** constructor signatures from terminal output into your control class.
-
-Terminal output:
-```
-===== BEGIN =====
-// The following three lines were generated and should remain as-is
-constructor(id?: string | $MyControlSettings);
-constructor(id?: string, settings?: $MyControlSettings);
-constructor(id?: string, settings?: $MyControlSettings) { super(id, settings); }
-===== END =====
-```
-
-Copy into class:
-
-```typescript
-export default class MyControl extends Control {
-    // The following three lines were generated and should remain as-is
-    constructor(id?: string | $MyControlSettings);
-    constructor(id?: string, settings?: $MyControlSettings);
-    constructor(id?: string, settings?: $MyControlSettings) { super(id, settings); }
-
-    static readonly metadata: MetadataOptions = {
-        // ...
-    };
-}
-```
-
-### 4.3 Control Metadata Typing
+### Essential Pattern
 
 ```typescript
 import Control from "sap/ui/core/Control";
@@ -429,139 +278,40 @@ import type { MetadataOptions } from "sap/ui/core/Element";
 export default class MyControl extends Control {
     static readonly metadata: MetadataOptions = {
         properties: {
-            "text": "string",
-            "enabled": { type: "boolean", defaultValue: true }
-        },
-        aggregations: {
-            "items": { type: "sap.ui.core.Control", multiple: true }
+            text: { type: "string", defaultValue: "" }
         },
         events: {
-            "press": {}
+            press: {
+                parameters: {
+                    value: { type: "string" }
+                }
+            }
         }
     };
-}
-```
-
-**Key Points**:
-- Import `MetadataOptions` from `sap/ui/core/Element`
-- Use `import type` (design-time only)
-- Available since UI5 1.110 (use `object` for earlier versions)
-
-### 4.4 Namespace Annotation (REQUIRED)
-
-```typescript
-/**
- * @namespace ui5.typescript.mylib.control
- */
-export default class MyControl extends Control {
-    // ...
-}
-```
-
-The transformer needs this to generate correct UI5 class names.
-
-### 4.5 Export Pattern
-
-**Must use `export default` immediately**:
-
-```typescript
-// ✅ CORRECT
-export default class MyControl extends Control {
-    // ...
-}
-
-// ❌ WRONG - Separate export
-class MyControl extends Control {
-    // ...
-}
-export default MyControl;
-```
-
-The interface generator will fail without immediate export.
-
-### 4.6 Renderer
-
-Define as static member:
-
-```typescript
-import RenderManager from "sap/ui/core/RenderManager";
-
-export default class MyControl extends Control {
-    static renderer = {
-        apiVersion: 2,
-        render: function (rm: RenderManager, control: MyControl): void {
-            rm.openStart("div", control);
-            rm.openEnd();
-            rm.text(control.getText());
-            rm.close("div");
-        }
-    };
-}
-```
-
-Or in separate file:
-
-```typescript
-// MyControlRenderer.ts
-import RenderManager from "sap/ui/core/RenderManager";
-import type MyControl from "./MyControl";
-
-export default {
-    apiVersion: 2,
-    render: function (rm: RenderManager, control: MyControl): void {
-        // ...
+    
+    public setText(value: string): this {
+        this.setProperty("text", value);
+        return this;
     }
-};
-
-// MyControl.ts
-import MyControlRenderer from "./MyControlRenderer";
-
-export default class MyControl extends Control {
-    static renderer = MyControlRenderer;
-}
-```
-
-### 4.7 Complete Control Example
-
-```typescript
-import Control from "sap/ui/core/Control";
-import type { MetadataOptions } from "sap/ui/core/Element";
-import RenderManager from "sap/ui/core/RenderManager";
-
-/**
- * @namespace ui5.typescript.mylib.control
- */
-export default class MyControl extends Control {
-    // Generated constructor signatures (copy from ts-interface-generator output)
-    constructor(id?: string | $MyControlSettings);
-    constructor(id?: string, settings?: $MyControlSettings);
-    constructor(id?: string, settings?: $MyControlSettings) { super(id, settings); }
-
-    static readonly metadata: MetadataOptions = {
-        properties: {
-            "text": "string"
-        },
-        events: {
-            "press": {}
-        }
-    };
-
-    static renderer = {
-        apiVersion: 2,
-        render: function (rm: RenderManager, control: MyControl): void {
-            rm.openStart("div", control);
-            rm.class("myControl");
-            rm.openEnd();
-            rm.text(control.getText());
-            rm.close("div");
-        }
-    };
-
-    onclick(): void {
-        this.firePress();
+    
+    public firePress(parameters: { value: string }): this {
+        this.fireEvent("press", parameters);
+        return this;
     }
 }
 ```
+
+### Complete Guide
+
+For comprehensive custom control conversion including:
+- MetadataOptions structure
+- Property/aggregation/association typing
+- Renderer conversion
+- Event parameter types
+- Method chaining
+- Constructor patterns
+
+See [references/custom-control-conversion.md](references/custom-control-conversion.md).
 
 ---
 
@@ -676,213 +426,51 @@ Check for `MyControl.gen.d.ts` file.
 
 ## 8. Version-Specific TypeScript Patterns
 
-### 8.1 UI5 Version Detection in TypeScript
+**Overview**: TypeScript patterns vary by UI5 version. Key versions: 1.90.0 (IAsyncContentCreation), 1.113.0 (Test Starter), 1.115.0 (control-specific event types).
 
-**Check UI5 Version at Runtime**
+### Essential Version Detection
+
 ```typescript
 import VersionInfo from "sap/ui/VersionInfo";
 
-export default class AppController extends BaseController {
-    public async onInit(): Promise<void> {
-        const versionInfo = await VersionInfo.load();
-        const ui5Version = versionInfo.version;  // "1.136.7"
-        
-        const majorMinor = this._extractMajorMinor(ui5Version);
-        if (majorMinor >= 115.0) {
-            // Use control-specific event types
-            this._useModernEventTypes();
-        } else {
-            // Fallback to generic Event type
-            this._useLegacyEventTypes();
-        }
+const versionInfo = await VersionInfo.load();
+const version = versionInfo.version; // "1.120.5"
+
+// Compare versions
+function isAtLeast(target: string): boolean {
+    const current = version.split('.').map(Number);
+    const targetParts = target.split('.').map(Number);
+    for (let i = 0; i < 3; i++) {
+        if (current[i] > targetParts[i]) return true;
+        if (current[i] < targetParts[i]) return false;
     }
-    
-    private _extractMajorMinor(version: string): number {
-        const parts = version.split('.');
-        return parseFloat(`${parts[0]}.${parts[1]}`);
-    }
+    return true;
 }
 ```
 
-### 8.2 Conditional Event Type Imports
+### Version-Aware Event Types (UI5 >= 1.115.0)
 
-**UI5 >= 1.115.0**: Control-specific event types
 ```typescript
-import Button from "sap/m/Button";
-import Button$PressEvent from "sap/m/Button$PressEvent";
-import Table from "sap/m/Table";
-import Table$RowSelectionChangeEvent from "sap/m/Table$RowSelectionChangeEvent";
+// UI5 >= 1.115.0
+import { Button$PressEvent } from "sap/m/Button";
+public onPress(event: Button$PressEvent): void { }
 
-export default class Controller extends BaseController {
-    public onPress(event: Button$PressEvent): void {
-        const button = event.getSource();  // Typed as Button
-    }
-    
-    public onRowSelect(event: Table$RowSelectionChangeEvent): void {
-        const params = event.getParameters();  // Fully typed
-    }
-}
-```
-
-**UI5 < 1.115.0**: Generic Event type
-```typescript
+// UI5 < 1.115.0
 import Event from "sap/ui/base/Event";
-import Button from "sap/m/Button";
-
-export default class Controller extends BaseController {
-    public onPress(event: Event): void {
-        const button = event.getSource() as Button;  // Manual cast needed
-    }
-}
+public onPress(event: Event): void { }
 ```
 
-### 8.3 IAsyncContentCreation Interface (UI5 >= 1.90.0)
+### Complete Guide
 
-**Component.ts**
-```typescript
-import UIComponent from "sap/ui/core/UIComponent";
+For comprehensive version-specific patterns including:
+- Runtime version detection
+- Conditional event type imports
+- IAsyncContentCreation interface (>= 1.90.0)
+- Type-safe Component metadata
+- Modern test setup with TypeScript
+- Deprecated API handling
 
-/**
- * @namespace my.app
- */
-export default class Component extends UIComponent {
-    public static metadata = {
-        manifest: "json",
-        interfaces: ["sap.ui.core.IAsyncContentCreation"]  // >= 1.90.0
-    };
-
-    public init(): void {
-        // Call parent init
-        super.init();
-        
-        // Router and rootView are automatically async
-        this.getRouter().initialize();
-    }
-}
-```
-
-**Benefits**:
-- Implicit async for `rootView` and router
-- Stricter error handling during view processing
-- Nested views handled asynchronously
-
-### 8.4 Type-Safe Component Metadata
-
-**Full MetadataOptions with Version Markers**
-```typescript
-import UIComponent from "sap/ui/core/UIComponent";
-import { ComponentMetadata } from "sap/ui/core/Component.MetadataOptions";
-
-export default class Component extends UIComponent {
-    public static metadata: ComponentMetadata = {
-        manifest: "json",                     // Required for descriptor
-        interfaces: [
-            "sap.ui.core.IAsyncContentCreation"  // >= 1.90.0
-        ],
-        properties: {
-            appTitle: {
-                type: "string",
-                defaultValue: "My App"
-            }
-        },
-        events: {
-            dataLoaded: {
-                parameters: {
-                    data: { type: "object" }
-                }
-            }
-        }
-    };
-}
-```
-
-### 8.5 TypeScript with Modern Test Setup
-
-**Using Test Starter with TypeScript (UI5 >= 1.113.0)**
-
-**unit/unitTests.qunit.ts**
-```typescript
-import "sap/ui/qunit/utils/createAndAppendDiv";
-import formatter from "my/app/model/formatter";
-
-QUnit.module("Formatter Tests");
-
-QUnit.test("formatCurrency should format with 2 decimals", (assert) => {
-    // Arrange
-    const input = 1234.567;
-    
-    // Act
-    const result = formatter.formatCurrency(input);
-    
-    // Assert
-    assert.strictEqual(result, "1,234.57", "Currency formatted correctly");
-});
-
-QUnit.start();
-```
-
-**integration/opaTests.qunit.ts**
-```typescript
-import Opa5 from "sap/ui/test/Opa5";
-import opaTest from "sap/ui/test/opaQunit";
-import AppPage from "./pages/App";
-
-QUnit.module("Navigation Journey");
-
-opaTest("Should see the initial page", function(Given, When, Then) {
-    // Arrange
-    Given.iStartMyUIComponent({
-        componentConfig: {
-            name: "my.app",
-            async: true
-        }
-    });
-    
-    // Act & Assert
-    Then.onTheAppPage.iShouldSeeTheApp();
-    
-    // Cleanup
-    Then.iTeardownMyApp();
-});
-
-QUnit.start();
-```
-
-### 8.6 Handling Deprecated APIs in TypeScript
-
-**Avoid Sync XHR (Deprecated in Browsers)**
-```typescript
-// ❌ WRONG - Sync XHR deprecated
-const xhr = new XMLHttpRequest();
-xhr.open("GET", "/api/data", false);  // sync = false deprecated
-xhr.send();
-
-// ✅ CORRECT - Async with Promises
-async function loadData(): Promise<any> {
-    const response = await fetch("/api/data");
-    return response.json();
-}
-```
-
-**OData V2 Model - Async Token Refresh**
-```typescript
-import ODataModel from "sap/ui/model/odata/v2/ODataModel";
-
-const model = new ODataModel("/odata/");
-
-// ❌ WRONG - Default async=false is deprecated
-model.refreshSecurityToken(
-    () => console.log("Token refreshed"),
-    () => console.error("Token refresh failed")
-);
-
-// ✅ CORRECT - Explicit async=true
-model.refreshSecurityToken(
-    () => console.log("Token refreshed"),
-    () => console.error("Token refresh failed"),
-    true  // bAsync parameter
-);
-```
+See [references/version-specific-patterns.md](references/version-specific-patterns.md).
 
 ---
 
