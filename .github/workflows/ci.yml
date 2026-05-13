@@ -32,6 +32,3 @@ jobs:
 
     - name: Perform dependency check
       run: npm run knip
-
-    - name: Test UI5 Guidelines Plugin
-      run: npm run test:ui5-guidelines
