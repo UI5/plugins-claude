@@ -40,46 +40,39 @@ Integration Cards development expert:
 
 ## Installation
 
-### Via Claude Code CLI
-
-```bash
-# From plugins-claude repository root
-npm install
-npm run build
-npm run link
-```
-
 ### Manual Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/UI5/plugins-claude.git
-cd plugins-claude/plugins/ui5-guidelines
-
-# Install dependencies and build
-npm install
-npm run build
+# Clone the skills branch
+git clone -b feat-ui5-skills https://github.com/UI5/plugins-claude.git ui5-guidelines-plugin
+cd ui5-guidelines-plugin/plugins/ui5-guidelines
 
 # Link to Claude plugins directory
 ln -s $(pwd) ~/.claude/plugins/ui5-guidelines
 ```
 
+### Enable in Claude Settings
+
+Add to `~/.claude/settings.json`:
+
+```json
+{
+  "enabledPlugins": {
+    "ui5-guidelines": true
+  }
+}
+```
+
 ### Verify Installation
 
 ```bash
-# Check plugin is recognized
-ls ~/.claude/plugins/ui5-guidelines
+# Check plugin is linked
+ls ~/.claude/plugins/ui5-guidelines/skills
 
-# Run tests to verify functionality
-npm test
+# Should show: ui5-best-practices  ui5-integration-cards  ui5-typescript-expert
 ```
 
-Expected output:
-```
-✅ Structure: 12/12 passing (100%)
-✅ Triggering: 46/46 passing (100%)
-✅ Performance: 7/7 passing
-```
+Restart Claude (CLI or VSCode extension) to load the plugin.
 
 ---
 
@@ -275,45 +268,13 @@ opaTest("test", function() {
 
 **Configuration Editor Sync:**
 ```javascript
-// dt/Configuration.js - Must match manifest.json
-cardTitle: {
-    manifestpath: "/sap.card/configuration/parameters/cardTitle/value",
-    type: "string",
-    label: "Card Title"
-}
+// dt/Configuration.js must return same structure as manifest.json
+module.exports = {
+    "label": "Sales Dashboard",
+    "type": "string",
+    "path": "/sap.card/header/title"  // ✅ Path to manifest property
+};
 ```
-
----
-
-## Testing
-
-### Run All Tests
-
-```bash
-npm test
-```
-
-### Run Specific Test Suites
-
-```bash
-npm run test:structure      # Plugin structure validation
-npm run test:triggering     # Skill triggering accuracy (100%)
-npm run test:performance    # Context budget checks
-```
-
-### View Metrics (Optional)
-
-```bash
-# Load sample analytics data
-npm run seed-metrics
-
-# View dashboard
-npm run metrics              # Last 7 days
-npm run metrics:month        # Last 30 days
-npm run metrics:optimize     # With optimization tips
-```
-
-See [TESTING.md](TESTING.md) for comprehensive testing guide.
 
 ---
 
@@ -321,112 +282,81 @@ See [TESTING.md](TESTING.md) for comprehensive testing guide.
 
 ### Skills Don't Trigger
 
-**Problem:** Ask UI5 question but skill doesn't activate.
+**Problem:** Asking UI5 questions but skills don't activate
 
-**Solutions:**
-1. Make your question more specific:
-   - ❌ "How do I load modules?"
-   - ✅ "How do I load UI5 modules with sap.ui.define?"
-
-2. Include UI5-specific terms:
-   - "UI5", "SAPUI5", "sap.m", "Component.js"
-
-3. Check skill triggering accuracy:
-   ```bash
-   npm run test:triggering
+**Fix:**
+1. Verify plugin is enabled in `~/.claude/settings.json`:
+   ```json
+   "enabledPlugins": { "ui5-guidelines": true }
    ```
-
-### Test Failures
-
-**Problem:** Tests fail after changes.
-
-**Solutions:**
-1. Check what failed:
+2. Check symlink exists:
    ```bash
-   npm run test:structure   # Plugin structure
-   npm run test:triggering  # Skill matching
+   ls ~/.claude/plugins/ui5-guidelines
    ```
-
-2. If triggering test fails:
-   - Add missing keywords to skill YAML frontmatter
-   - Update `test/config/matching-config.json`
-
-3. If structure test fails:
-   - Verify all SKILL.md files have YAML frontmatter
-   - Check no broken links in documentation
+3. Restart Claude (CLI or VSCode extension)
+4. Use specific UI5 keywords in your questions:
+   - `sap.ui.define`, `TypeScript conversion`, `Integration Card`
 
 ### Installation Issues
 
-**Problem:** Plugin not found after installation.
+**Problem:** Plugin not found after symlink
 
-**Solutions:**
-1. Verify symlink:
-   ```bash
-   ls -la ~/.claude/plugins/ui5-guidelines
-   ```
+**Fix:**
+```bash
+# Remove old symlink
+rm ~/.claude/plugins/ui5-guidelines
 
-2. Check build completed:
-   ```bash
-   cd plugins-claude/plugins/ui5-guidelines
-   ls dist/  # Should contain compiled .js files
-   ```
+# Clone correct branch
+git clone -b feat-ui5-skills https://github.com/UI5/plugins-claude.git ui5-guidelines-plugin
+cd ui5-guidelines-plugin/plugins/ui5-guidelines
 
-3. Rebuild if needed:
-   ```bash
-   npm run build
-   ```
+# Create fresh symlink
+ln -s $(pwd) ~/.claude/plugins/ui5-guidelines
 
----
-
-## Technical Details
-
-**Skills:**
-- ui5-best-practices (663 lines + 3 references)
-- ui5-typescript-expert (517 lines + 6 references)
-- ui5-integration-cards (489 lines + 6 references)
-
-**Test Framework:**
-- TypeScript ESM with strict mode
-- Type-safe test execution
-- Configurable matching algorithm
-- 46 test cases with 100% triggering accuracy
-
-**Progressive Disclosure:**
-- Main skills: Core patterns and essential examples
-- References: Detailed guides loaded on-demand
-- Context reduction: 36% vs pre-optimization
-
-**Coverage:**
-- Overall: 85% of official SAP UI5 guidelines
-- ui5-integration-cards: 92%
-- ui5-typescript-expert: 85%
-- ui5-best-practices: 78%
+# Verify
+ls ~/.claude/plugins/ui5-guidelines/skills
+```
 
 ---
 
-## Version Compatibility
+## Testing
 
-- **UI5**: 1.71.0+ (version-aware patterns for 1.90.0+, 1.113.0+, 1.115.0+)
-- **TypeScript**: 5.0+
-- **CAP**: 6.0+
-- **Node.js**: 18.0+
+For contributors: A comprehensive test suite is available on the [test/ui5-skills-testing](https://github.com/UI5/plugins-claude/tree/test/ui5-skills-testing) branch.
 
 ---
 
-## Documentation
+## Version Information
 
-- **[TESTING.md](TESTING.md)** - Complete testing and metrics guide
+- **Plugin Version:** 1.0.0
+- **UI5 Version:** 1.136.7
+- **Coverage:** 85% of MCP server resources
+  - ui5-best-practices: 78% (28/36 topics)
+  - ui5-typescript-expert: 85% (17/20 topics)
+  - ui5-integration-cards: 92% (11/12 topics)
 
 ---
 
 ## License
 
-Apache-2.0
+Apache-2.0 - See [LICENSE](../../LICENSE.txt) for details
+
+---
+
+## Related Documentation
+
+- **Test Suite:** [test/ui5-skills-testing branch](https://github.com/UI5/plugins-claude/tree/test/ui5-skills-testing)
+- **SAP UI5 Documentation:** [ui5.sap.com](https://ui5.sap.com)
+- **TypeScript Conversion Guide:** Included in ui5-typescript-expert skill
+- **Integration Cards Guide:** Included in ui5-integration-cards skill
 
 ---
 
 ## Support
 
-- **Repository**: https://github.com/UI5/plugins-claude
-- **Issues**: https://github.com/UI5/plugins-claude/issues
-- **UI5 Documentation**: https://ui5.sap.com
+For issues or questions:
+- **Plugin Issues:** [GitHub Issues](https://github.com/UI5/plugins-claude/issues)
+- **SAP UI5 Questions:** [SAP Community](https://community.sap.com)
+
+---
+
+**Plugin Status:** ✅ Production Ready | 85% Coverage | 3 Skills Active

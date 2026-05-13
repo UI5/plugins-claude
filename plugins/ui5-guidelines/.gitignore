@@ -1,15 +1,2 @@
-# Metrics and telemetry data (local only)
-.metrics/
-*.metrics.json
-
-# Test artifacts
-test/coverage/
-test/.tmp/
-
-# TypeScript build output
-dist/
-*.tsbuildinfo
-
-# Node modules
-node_modules/
-package-lock.json
+.DS_Store
+*.backup
