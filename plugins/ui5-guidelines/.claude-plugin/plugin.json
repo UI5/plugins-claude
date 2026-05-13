@@ -1,6 +1,6 @@
 {
     "name": "ui5-guidelines",
-    "version": "2.1.0",
+    "version": "1.0.0",
     "description": "Comprehensive UI5 development guidelines and best practices derived from official SAP documentation (UI5 1.136.7). Version-aware skills covering CSP directives, XML event handling ($parameters, $source, $event, $controller), Test Starter patterns, Component metadata, and version-specific APIs. Includes modern coding standards, TypeScript conversion patterns, and Integration Cards development.",
     "author": {
         "name": "SAP SE"

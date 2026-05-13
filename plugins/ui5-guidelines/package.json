@@ -1,10 +1,10 @@
 {
   "name": "@ui5/guidelines-plugin",
-  "version": "2.1.0",
+  "version": "1.0.0",
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "tsc && cp test/config/matching-config.json dist/test/config/ && cp test/fixtures/*.json dist/test/fixtures/ 2>/dev/null || true",
+    "build": "tsc && mkdir -p dist/test/config dist/test/fixtures dist/scripts && cp test/config/matching-config.json dist/test/config/ && cp test/fixtures/*.json dist/test/fixtures/ && cp test/fixtures/*.jsonl dist/test/fixtures/ 2>/dev/null || true",
     "test": "npm run build && node dist/test/index.js",
     "test:structure": "npm run build && node dist/test/index.js --suite structure",
     "test:triggering": "npm run build && node dist/test/index.js --suite triggering",
