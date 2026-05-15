@@ -2,7 +2,7 @@
 
 **Version 1.0.0** | UI5 development guidelines and best practices for Claude Code
 
-Three specialized, version-aware skills covering modern coding standards, TypeScript conversion, and Integration Cards development. Derived from official SAP UI5 documentation (1.136.7).
+Two specialized, version-aware skills covering modern coding standards and TypeScript conversion. Derived from official SAP UI5 documentation (1.136.7).
 
 ---
 
@@ -27,14 +27,6 @@ Expert TypeScript conversion and migration:
 - MetadataOptions configuration
 - Test conversion (OPA5, QUnit)
 - Version-aware patterns (>= 1.90.0, >= 1.115.0)
-
-### 📊 ui5-integration-cards
-Integration Cards development expert:
-- All 6 card types (List, Table, Calendar, Timeline, Object, Analytical)
-- Data configuration patterns
-- 44 chart types with feed UIDs
-- Configuration Editor setup
-- Troubleshooting "No data" errors
 
 ---
 
@@ -69,7 +61,7 @@ Add to `~/.claude/settings.json`:
 # Check plugin is linked
 ls ~/.claude/plugins/ui5-guidelines/skills
 
-# Should show: ui5-best-practices  ui5-integration-cards  ui5-typescript-expert
+# Should show: ui5-best-practices  ui5-typescript-expert
 ```
 
 Restart Claude (CLI or VSCode extension) to load the plugin.
@@ -90,9 +82,6 @@ Ask UI5 questions and the appropriate skill activates:
 
 "Convert my UI5 controller to TypeScript"
 → ui5-typescript-expert skill activates
-
-"Create analytical card with donut chart"
-→ ui5-integration-cards skill activates
 ```
 
 ### What Each Skill Covers
@@ -115,13 +104,6 @@ Ask UI5 questions and the appropriate skill activates:
 - Test conversion (OPA5, QUnit)
 - Version-aware patterns (>= 1.90.0, >= 1.115.0)
 
-**ui5-integration-cards:**
-- All 6 card types (List, Table, Calendar, Timeline, Object, Analytical)
-- Data configuration patterns
-- 44 chart types with feed UIDs
-- Configuration Editor setup
-- Troubleshooting "No data" errors
-
 ### Quick Examples
 
 ```javascript
@@ -132,10 +114,6 @@ Ask UI5 questions and the appropriate skill activates:
 // Get TypeScript help
 "How do I type event handlers in UI5 1.115+?"
 "Convert my custom control to TypeScript"
-
-// Create Integration Cards
-"Show me an analytical card with column chart"
-"Fix 'No data to display' error in my card"
 ```
 
 ---
@@ -222,59 +200,95 @@ opaTest("test", function() {
 | OPA Given/When/Then params | Use class-based page objects |
 | Forgetting constructor copy | Manually copy from generator |
 
-### ui5-integration-cards Patterns
+---
 
-**Data Configuration (CRITICAL):**
-```json
-{
-    "sap.card": {
-        "data": {  // ✅ ALWAYS place data here
-            "request": { "url": "..." },
-            "path": "/value"
-        },
-        "content": {
-            "data": {  // ⚠️ Only if overriding path
-                "path": "/items"
-            }
-        }
-    }
-}
+## Testing
+
+The UI5 Guidelines plugin has a **three-level testing approach**. See [TESTING.md](TESTING.md) for complete documentation.
+
+### Test Levels
+
+**Level 1: Unit Tests** (Structure & Performance) ✅  
+- 15 structure tests, 8 performance tests
+- Validates plugin configuration and token budgets
+- Fast, deterministic, no API calls
+
+**Level 2: Proxy Tests** (Triggering Simulation) ⚠️  
+- 32 triggering tests with simulated keyword matching
+- **Important**: These do NOT test real Claude behavior
+- Use for development feedback and keyword coverage
+
+**Level 3: Integration Tests** (Live API) 🔬  
+- 32 test cases per provider (Anthropic API, Claude Code CLI)
+- Tests actual Claude model behavior
+- Multi-provider support with cost tracking
+- **Status**: 6 critical bugs fixed, 11 enhancements pending
+
+### Quick Test
+
+```bash
+cd plugins/ui5-guidelines
+npm install
+npm run build
+
+# Run unit tests (Level 1 & 2) - Free, fast
+npm test
+
+# Run integration tests (Level 3) - Requires API key
+export ANTHROPIC_API_KEY="sk-ant-..."
+npm run test:integration:api          # Anthropic API (~$0.40-0.80)
+npm run test:integration:claude       # Claude Code CLI (free)
+npm run test:integration:cross        # Cross-provider consistency
 ```
 
-**Analytical Chart UIDs:**
-| Chart Type | Required UIDs |
-|------------|---------------|
-| column/bar | categoryAxis, valueAxis |
-| donut/pie | size, color |
-| line | categoryAxis, valueAxis |
-| timeseries_line | timeAxis, valueAxis |
-| bubble | valueAxis, valueAxis2, bubbleWidth, color |
-| heatmap | categoryAxis, categoryAxis2, color |
-| scatter | valueAxis, valueAxis2, color |
-| waterfall | categoryAxis, valueAxis |
-
-**Feed Example:**
-```json
-{
-    "chartType": "column",
-    "measures": [{"name": "Revenue", "value": "{revenue}"}],
-    "dimensions": [{"name": "Region", "value": "{region}"}],
-    "feeds": [
-        {"type": "Dimension", "uid": "categoryAxis", "values": ["Region"]},
-        {"type": "Measure", "uid": "valueAxis", "values": ["Revenue"]}
-    ]
-}
+**Expected output (unit tests):**
+```
+✅ Structure: 16/16 passing (100%)
+⚠️  Triggering: 46/46 passing (97.8% - simulation only)
+✅ Performance: 7/7 passing (100%)
 ```
 
-**Configuration Editor Sync:**
-```javascript
-// dt/Configuration.js must return same structure as manifest.json
-module.exports = {
-    "label": "Sales Dashboard",
-    "type": "string",
-    "path": "/sap.card/header/title"  // ✅ Path to manifest property
-};
+### Run Specific Tests
+
+```bash
+# Unit tests (fast, no cost)
+npm run test:structure      # Plugin structure validation
+npm run test:triggering     # Keyword coverage (simulation)
+npm run test:performance    # Context budget checks
+
+# Integration tests (slow, costs money)
+npm run test:integration           # All providers
+npm run test:integration:api       # Anthropic API only
+npm run test:integration:claude    # Claude Code CLI only
+
+# Watch mode (development)
+npm run test:watch  # Auto-rerun on changes
 ```
+
+### Understanding Test Results
+
+**⚠️ Important**: Proxy test results (97.8%) show keyword coverage, NOT real Claude behavior.
+
+For real-world accuracy, see integration test results:
+- Target: >90% accuracy with real Claude API
+- Cost: ~$0.40-0.80 per full test run
+- Run: Daily schedule or before releases
+
+### View Metrics
+
+```bash
+npm run metrics              # Last 7 days
+npm run metrics:week         # Last 7 days
+npm run metrics:month        # Last 30 days
+npm run metrics:optimize     # Optimization tips
+```
+
+### Documentation
+
+- **[TESTING.md](TESTING.md)** - Complete testing guide
+- **[TESTING_LIMITATIONS.md](TESTING_LIMITATIONS.md)** - Why proxy tests ≠ real tests
+- **[TESTING_ROADMAP.md](TESTING_ROADMAP.md)** - Future enhancements
+- **[PLAN.md](PLAN.md)** - Testing framework implementation plan
 
 ---
 
@@ -295,7 +309,7 @@ module.exports = {
    ```
 3. Restart Claude (CLI or VSCode extension)
 4. Use specific UI5 keywords in your questions:
-   - `sap.ui.define`, `TypeScript conversion`, `Integration Card`
+   - `sap.ui.define`, `TypeScript conversion`, `OData types`
 
 ### Installation Issues
 
@@ -329,10 +343,9 @@ For contributors: A comprehensive test suite is available on the [test/ui5-skill
 
 - **Plugin Version:** 1.0.0
 - **UI5 Version:** 1.136.7
-- **Coverage:** 85% of MCP server resources
+- **Coverage:** 81% of MCP server resources
   - ui5-best-practices: 78% (28/36 topics)
   - ui5-typescript-expert: 85% (17/20 topics)
-  - ui5-integration-cards: 92% (11/12 topics)
 
 ---
 
@@ -347,7 +360,6 @@ Apache-2.0 - See [LICENSE](../../LICENSE.txt) for details
 - **Test Suite:** [test/ui5-skills-testing branch](https://github.com/UI5/plugins-claude/tree/test/ui5-skills-testing)
 - **SAP UI5 Documentation:** [ui5.sap.com](https://ui5.sap.com)
 - **TypeScript Conversion Guide:** Included in ui5-typescript-expert skill
-- **Integration Cards Guide:** Included in ui5-integration-cards skill
 
 ---
 
@@ -359,4 +371,4 @@ For issues or questions:
 
 ---
 
-**Plugin Status:** ✅ Production Ready | 85% Coverage | 3 Skills Active
+**Plugin Status:** ✅ Production Ready | 81% Coverage | 2 Skills Active
