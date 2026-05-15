@@ -2,7 +2,9 @@
 
 **Version 1.0.0** | UI5 development guidelines and best practices for Claude Code
 
-Two specialized, version-aware skills covering modern coding standards and TypeScript conversion. Derived from official SAP UI5 documentation (1.136.7).
+Version-aware skill covering modern UI5 coding standards and architectural patterns. Derived from official SAP UI5 documentation (1.136.7). For TypeScript conversion, use the dedicated `ui5-typescript-conversion` plugin.
+
+**Status**: ✅ Production Ready | ✅ Unit tests passing | ⚠️ Integration tests available
 
 ---
 
@@ -18,15 +20,10 @@ Modern UI5 coding standards and architectural patterns:
 - XML event handling ($parameters, $source, $event)
 - Test Starter setup
 - CAP integration
+- Version detection and runtime checks
+- Component metadata configuration
 
-### 🔄 ui5-typescript-expert
-Expert TypeScript conversion and migration:
-- Project setup (tsconfig, package.json, ui5.yaml)
-- Controller/Component conversion
-- Custom control migration
-- MetadataOptions configuration
-- Test conversion (OPA5, QUnit)
-- Version-aware patterns (>= 1.90.0, >= 1.115.0)
+**Note**: For TypeScript conversion, install the separate [`ui5-typescript-conversion`](https://github.com/UI5/plugins-claude/tree/main/plugins/ui5-typescript-conversion) plugin.
 
 ---
 
@@ -61,7 +58,7 @@ Add to `~/.claude/settings.json`:
 # Check plugin is linked
 ls ~/.claude/plugins/ui5-guidelines/skills
 
-# Should show: ui5-best-practices  ui5-typescript-expert
+# Should show: ui5-best-practices
 ```
 
 Restart Claude (CLI or VSCode extension) to load the plugin.
@@ -80,11 +77,14 @@ Ask UI5 questions and the appropriate skill activates:
 "How do I set up async module loading in UI5?"
 → ui5-best-practices skill activates
 
-"Convert my UI5 controller to TypeScript"
-→ ui5-typescript-expert skill activates
+"Show me XML event handler with $source model"
+→ ui5-best-practices skill activates
+
+"How to configure CSP in Component.js?"
+→ ui5-best-practices skill activates
 ```
 
-### What Each Skill Covers
+### What the Skill Covers
 
 **ui5-best-practices:**
 - Async module loading (`sap.ui.define`)
@@ -95,14 +95,8 @@ Ask UI5 questions and the appropriate skill activates:
 - XML event handling ($parameters, $source, $event)
 - Test Starter setup
 - CAP integration
-
-**ui5-typescript-expert:**
-- Project setup (tsconfig, package.json, ui5.yaml)
-- Controller/Component conversion
-- Custom control migration
-- MetadataOptions configuration
-- Test conversion (OPA5, QUnit)
-- Version-aware patterns (>= 1.90.0, >= 1.115.0)
+- Version detection patterns
+- Component metadata configuration
 
 ### Quick Examples
 
@@ -110,10 +104,8 @@ Ask UI5 questions and the appropriate skill activates:
 // Ask for best practices
 "What's the correct way to load a UI5 module?"
 "How do I use OData types in data binding?"
-
-// Get TypeScript help
-"How do I type event handlers in UI5 1.115+?"
-"Convert my custom control to TypeScript"
+"Show me $parameters usage in XML event handlers"
+"How to set up Test Starter in UI5?"
 ```
 
 ---
@@ -153,53 +145,22 @@ import Button from "sap/m/Button";
 | `SimpleForm` for forms | Use `Form` with `ColumnLayout` |
 | Generic event types | Use specific types (`Button$PressEvent`) |
 
-### ui5-typescript-expert Patterns
 
-**Conversion Order:**
-1. Setup: `package.json` + `tsconfig.json` + `ui5.yaml`
-2. Code: ES6 classes + imports + types
-3. Controls: `MetadataOptions` + `ts-interface-generator`
-4. Tests: OPA class pattern
+### TypeScript Conversion
 
-**Critical Steps:**
+For TypeScript conversion, use the dedicated **[ui5-typescript-conversion](https://github.com/UI5/plugins-claude/tree/main/plugins/ui5-typescript-conversion)** plugin:
+
 ```bash
-# 1. Add TypeScript dependencies
-npm install --save-dev @sapui5/types typescript ui5-tooling-transpile-task
-
-# 2. Convert code patterns
-sap.ui.define(...) → import ... from ...
-Controller.extend(...) → export default class ... extends Controller
-
-# 3. Custom controls (IMPORTANT)
-npm install --save-dev @ui5/ts-interface-generator
-npm run watch:controls
-# ⚠️ MANUALLY copy constructor signatures from generated code!
-
-# 4. Validate types
-npm run ts-typecheck
+claude plugin install ui5-typescript-conversion@claude-plugins-official
 ```
 
-**OPA Pattern Change (CRITICAL):**
-```typescript
-// ❌ OLD (JavaScript)
-opaTest("test", (Given, When, Then) => { ... });
-
-// ✅ NEW (TypeScript)
-const onTheAppPage = new AppPage();  // Create BEFORE tests
-opaTest("test", function() {
-    onTheAppPage.iStartMyUIComponent({...});
-    onTheAppPage.iClickButton();  // Direct method calls
-});
-```
-
-**Common Mistakes:**
-| Mistake | Solution |
-|---------|----------|
-| Using `any` type | Import actual control types |
-| `unknown` casts | Import from `sap/m/*` modules |
-| OPA Given/When/Then params | Use class-based page objects |
-| Forgetting constructor copy | Manually copy from generator |
-
+The TypeScript conversion plugin provides comprehensive guidance for:
+- Project setup (tsconfig, package.json, ui5.yaml)
+- Controller/Component conversion
+- Custom control migration with ts-interface-generator
+- MetadataOptions configuration
+- Test conversion (OPA5, QUnit)
+- Type safety enforcement
 ---
 
 ## Testing
@@ -214,12 +175,12 @@ The UI5 Guidelines plugin has a **three-level testing approach**. See [TESTING.m
 - Fast, deterministic, no API calls
 
 **Level 2: Proxy Tests** (Triggering Simulation) ⚠️  
-- 32 triggering tests with simulated keyword matching
+- 20 triggering tests with simulated keyword matching
 - **Important**: These do NOT test real Claude behavior
 - Use for development feedback and keyword coverage
 
 **Level 3: Integration Tests** (Live API) 🔬  
-- 32 test cases per provider (Anthropic API, Claude Code CLI)
+- 20 test cases per provider (Anthropic API, Claude Code CLI)
 - Tests actual Claude model behavior
 - Multi-provider support with cost tracking
 - **Status**: 6 critical bugs fixed, 11 enhancements pending
@@ -236,16 +197,16 @@ npm test
 
 # Run integration tests (Level 3) - Requires API key
 export ANTHROPIC_API_KEY="sk-ant-..."
-npm run test:integration:api          # Anthropic API (~$0.40-0.80)
+npm run test:integration:api          # Anthropic API (~$0.15-0.35)
 npm run test:integration:claude       # Claude Code CLI (free)
 npm run test:integration:cross        # Cross-provider consistency
 ```
 
 **Expected output (unit tests):**
 ```
-✅ Structure: 16/16 passing (100%)
-⚠️  Triggering: 46/46 passing (97.8% - simulation only)
-✅ Performance: 7/7 passing (100%)
+✅ Structure: 14/14 passing (100%)
+⚠️  Triggering: 26/26 passing (100% - simulation only)
+✅ Performance: 6/6 passing (100%)
 ```
 
 ### Run Specific Tests
@@ -271,7 +232,7 @@ npm run test:watch  # Auto-rerun on changes
 
 For real-world accuracy, see integration test results:
 - Target: >90% accuracy with real Claude API
-- Cost: ~$0.40-0.80 per full test run
+- Cost: ~$0.15-0.35 per full test run
 - Run: Daily schedule or before releases
 
 ### View Metrics
@@ -309,7 +270,7 @@ npm run metrics:optimize     # Optimization tips
    ```
 3. Restart Claude (CLI or VSCode extension)
 4. Use specific UI5 keywords in your questions:
-   - `sap.ui.define`, `TypeScript conversion`, `OData types`
+   - `sap.ui.define`, `OData types`, `$parameters`, `CSP`
 
 ### Installation Issues
 
@@ -343,9 +304,8 @@ For contributors: A comprehensive test suite is available on the [test/ui5-skill
 
 - **Plugin Version:** 1.0.0
 - **UI5 Version:** 1.136.7
-- **Coverage:** 81% of MCP server resources
+- **Coverage:** 78% of MCP server resources
   - ui5-best-practices: 78% (28/36 topics)
-  - ui5-typescript-expert: 85% (17/20 topics)
 
 ---
 
@@ -359,7 +319,7 @@ Apache-2.0 - See [LICENSE](../../LICENSE.txt) for details
 
 - **Test Suite:** [test/ui5-skills-testing branch](https://github.com/UI5/plugins-claude/tree/test/ui5-skills-testing)
 - **SAP UI5 Documentation:** [ui5.sap.com](https://ui5.sap.com)
-- **TypeScript Conversion Guide:** Included in ui5-typescript-expert skill
+- **TypeScript Conversion:** [ui5-typescript-conversion plugin](https://github.com/UI5/plugins-claude/tree/main/plugins/ui5-typescript-conversion)
 
 ---
 
@@ -371,4 +331,4 @@ For issues or questions:
 
 ---
 
-**Plugin Status:** ✅ Production Ready | 81% Coverage | 2 Skills Active
+**Plugin Status:** ✅ Production Ready | 78% Coverage | 1 Skill Active
