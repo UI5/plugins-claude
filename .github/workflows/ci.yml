@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
     - name: Use Node.js 22
       uses: actions/setup-node@v6
       with:
@@ -26,6 +28,14 @@ jobs:
 
     - name: Perform Prettier check
       run: npm run prettier:check
+
+    - name: Validate current commit (last commit) with commitlint
+      if: github.event_name == 'push'
+      run: npm run lint:commit -- --last --verbose
+
+    - name: Validate PR commits with commitlint
+      if: github.event_name == 'pull_request'
+      run: npm run lint:commit -- --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
 
     - name: Perform Licenses check
       run: npm run check-licenses
