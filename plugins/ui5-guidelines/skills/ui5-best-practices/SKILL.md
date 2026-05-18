@@ -218,21 +218,6 @@ When modifying `.properties` files, follow the appropriate workflow based on you
 - Update `i18n.properties` (base file) only
 - Changes will be reflected immediately for development
 
-When modifying `.properties` files, **ALWAYS** apply changes to all relevant locales to ensure consistency across different language versions.
-
-```bash
-# If you add to i18n.properties:
-title=Customer List
-
-# Also add to all existing translation files:
-i18n_en.properties
-i18n_de.properties
-i18n_fr.properties
-# ... etc.
-```
-
-**Why**: Maintains consistency across languages and prevents missing translations.
-
 **Production translation workflows**:
 - **SAP S/4HANA apps**: **NEVER** manually edit localized files (`i18n_de.properties`, `i18n_fr.properties`, etc.)
   - Translation is handled through SAP's internal translation process
