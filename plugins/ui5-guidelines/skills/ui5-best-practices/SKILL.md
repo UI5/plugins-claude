@@ -241,6 +241,10 @@ When modifying `.properties` files, follow the appropriate workflow based on you
     alert("Hello");
 </script>
 
+<style>
+    .error { color: red; }
+</style>
+
 <div style="color: red;">Styled text</div>
 
 <!-- ✅ CORRECT - External files -->
@@ -253,8 +257,10 @@ When modifying `.properties` files, follow the appropriate workflow based on you
 
 **Requirements**:
 - All application logic must reside in dedicated JS or TS files
-- All styling must reside in dedicated CSS files and use CSS classes/IDs
-- Inline `<script>` and inline `style` attributes violate CSP
+- All styling must reside in dedicated CSS files
+- Inline `<script>` tags violate CSP
+- Inline `<style>` tags violate CSP
+- Inline `style` attributes violate CSP
 
 **Reference**: UI5 documentation page "Content Security Policy"
 
