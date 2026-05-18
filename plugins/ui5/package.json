@@ -1,0 +1,51 @@
+{
+  "name": "@ui5/claude-plugin-ui5-guidelines",
+  "version": "3.0.0",
+  "private": true,
+  "description": "UI5 development guidelines and best practices for Claude Code",
+  "type": "module",
+  "author": {
+    "name": "SAP SE",
+    "email": "openui5@sap.com",
+    "url": "https://www.sap.com"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UI5/plugins-claude.git",
+    "directory": "plugins/ui5-guidelines"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "test": "npm run build && npm run test:structure && npm run test:triggering && npm run test:performance",
+    "test:structure": "ava dist/test/suites/structure.test.js",
+    "test:triggering": "ava dist/test/suites/triggering.test.js",
+    "test:performance": "ava dist/test/suites/performance.test.js",
+    "test:watch": "ava --watch",
+    "test:integration": "npm run test:integration:api && npm run test:integration:claude && npm run test:integration:cross",
+    "test:integration:api": "ava dist/test/integration/suites/anthropic-api.test.js",
+    "test:integration:claude": "ava dist/test/integration/suites/claude-code.test.js",
+    "test:integration:cross": "ava dist/test/integration/suites/cross-provider.test.js",
+    "metrics": "node dist/scripts/metrics.js",
+    "metrics:week": "node dist/scripts/metrics.js --days 7",
+    "metrics:month": "node dist/scripts/metrics.js --days 30",
+    "metrics:optimize": "node dist/scripts/optimize.js"
+  },
+  "devDependencies": {
+    "@ava/typescript": "^5.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.0.0",
+    "ava": "^6.4.1",
+    "typescript": "^5.9.3",
+    "yaml": "^2.9.0",
+    "zod": "^3.24.1"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "js-yaml": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
