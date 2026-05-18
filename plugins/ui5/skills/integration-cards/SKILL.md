@@ -1107,6 +1107,7 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
 
 22. bubble
     * UIDs: dataFrame, color, shape, valueAxis, valueAxis2, bubbleWidth
+    * Note: Requires at least 3 measures (for valueAxis, valueAxis2, and bubbleWidth)
     * Example:
         ```json
         {
@@ -1114,6 +1115,10 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
             {
               "name": "Expansion",
               "value": "{expansionField}"
+            },
+            {
+              "name": "Cost",
+              "value": "{costField}"
             },
             {
               "name": "Size",
@@ -1129,6 +1134,16 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
           "feeds": [
             {
               "type": "Measure",
+              "uid": "valueAxis",
+              "values": ["Expansion"]
+            },
+            {
+              "type": "Measure",
+              "uid": "valueAxis2",
+              "values": ["Cost"]
+            },
+            {
+              "type": "Measure",
               "uid": "bubbleWidth",
               "values": ["Size"]
             },
@@ -1136,18 +1151,14 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
               "type": "Dimension",
               "uid": "color",
               "values": ["Sector"]
-            },
-            {
-              "type": "Measure",
-              "uid": "valueAxis",
-              "values": ["Expansion"]
             }
           ]
         }
         ```
 
 23. time_bubble
-    * UIDs: dataFrame, color, shape, valueAxis, valueAxis2, bubbleWidth
+    * UIDs: dataFrame, color, shape, valueAxis, valueAxis2, bubbleWidth, timeAxis
+    * Note: Requires timeAxis dimension, at least 2 measures (for valueAxis and bubbleWidth), and a color dimension
     * Example:
         ```json
         {
@@ -1155,6 +1166,10 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
             {
               "name": "Expansion",
               "value": "{expansionField}"
+            },
+            {
+              "name": "Growth",
+              "value": "{growthField}"
             },
             {
               "name": "Size",
@@ -1179,6 +1194,16 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
             },
             {
               "type": "Measure",
+              "uid": "valueAxis",
+              "values": ["Expansion"]
+            },
+            {
+              "type": "Measure",
+              "uid": "valueAxis2",
+              "values": ["Growth"]
+            },
+            {
+              "type": "Measure",
               "uid": "bubbleWidth",
               "values": ["Size"]
             },
@@ -1193,6 +1218,7 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
 
 24. timeseries_bubble
     * UIDs: color, shape, valueAxis, timeAxis, bubbleWidth
+    * Note: Requires timeAxis dimension with dataType "date", bubbleWidth measure, and valueAxis measure
     * Example:
         ```json
         {
@@ -1244,6 +1270,7 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
 
 25. scatter
     * UIDs: dataFrame, color, shape, valueAxis, valueAxis2
+    * Note: Requires 2 measures for valueAxis and valueAxis2
     * Example:
         ```json
         {
@@ -1576,6 +1603,7 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
 
 35. combination
     * UIDs: dataFrame, categoryAxis, color, valueAxis
+    * Note: Requires at least 2 measures in the valueAxis feed for proper rendering
     * Example:
         ```json
         {
@@ -1583,6 +1611,10 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
             {
               "name": "Expense",
               "value": "{expenseField}"
+            },
+            {
+              "name": "Revenue",
+              "value": "{revenueField}"
             }
           ],
           "dimensions": [
@@ -1600,7 +1632,7 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
             {
               "type": "Measure",
               "uid": "valueAxis",
-              "values": ["Expense"]
+              "values": ["Expense", "Revenue"]
             }
           ]
         }
@@ -1608,6 +1640,7 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
 
 36. stacked_combination
     * UIDs: dataFrame, categoryAxis, color, valueAxis
+    * Note: Requires at least 2 measures in the valueAxis feed for proper rendering
     * Example:
         ```json
         {
@@ -1615,6 +1648,10 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
             {
               "name": "Revenue",
               "value": "{revenueField}"
+            },
+            {
+              "name": "Sales",
+              "value": "{salesField}"
             }
           ],
           "dimensions": [
@@ -1632,7 +1669,7 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
             {
               "type": "Measure",
               "uid": "valueAxis",
-              "values": ["Revenue"]
+              "values": ["Revenue", "Sales"]
             }
           ]
         }
@@ -1640,6 +1677,7 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
 
 37. horizontal_stacked_combination
     * UIDs: dataFrame, categoryAxis, color, valueAxis
+    * Note: Requires at least 2 measures in the valueAxis feed for proper rendering
     * Example:
         ```json
         {
@@ -1647,6 +1685,10 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
             {
               "name": "Growth",
               "value": "{growthField}"
+            },
+            {
+              "name": "Revenue",
+              "value": "{revenueField}"
             }
           ],
           "dimensions": [
@@ -1664,7 +1706,7 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
             {
               "type": "Measure",
               "uid": "valueAxis",
-              "values": ["Growth"]
+              "values": ["Growth", "Revenue"]
             }
           ]
         }
@@ -1836,6 +1878,7 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
 
 42. timeseries_combination
     * UIDs: timeAxis, color, valueAxis
+    * Note: Requires at least 2 measures in the valueAxis feed for proper rendering
     * Example:
         ```json
         {
@@ -1843,6 +1886,10 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
             {
               "name": "Earnings",
               "value": "{earningsField}"
+            },
+            {
+              "name": "Revenue",
+              "value": "{revenueField}"
             }
           ],
           "dimensions": [
@@ -1861,7 +1908,7 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
             {
               "type": "Measure",
               "uid": "valueAxis",
-              "values": ["Earnings"]
+              "values": ["Earnings", "Revenue"]
             }
           ]
         }
@@ -1911,6 +1958,7 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
 
 44. timeseries_stacked_combination
     * UIDs: timeAxis, color, valueAxis
+    * Note: Requires at least 2 measures in the valueAxis feed for proper rendering
     * Example:
         ```json
         {
@@ -1918,6 +1966,10 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
             {
               "name": "Performance",
               "value": "{performanceField}"
+            },
+            {
+              "name": "Revenue",
+              "value": "{revenueField}"
             }
           ],
           "dimensions": [
@@ -1936,8 +1988,7 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
             {
               "type": "Measure",
               "uid": "valueAxis",
-              "values": ["Performance"]
+              "values": ["Performance", "Revenue"]
             }
           ]
         }
-        ```
