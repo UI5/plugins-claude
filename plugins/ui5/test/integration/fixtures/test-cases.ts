@@ -177,9 +177,86 @@ export const testCases: IntegrationTestCase[] = [
     expectedContent: "ComponentSupport"
   },
 
-  // Negative Test Cases (3 tests)
+  // CSP Directive-Specific (1 test)
   {
     id: 18,
+    name: "csp-script-src",
+    description: "CSP script-src directive for UI5",
+    prompt: "What should I set for script-src in Content Security Policy for UI5?",
+    category: "security-csp",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "script-src"
+  },
+
+  // Test Coverage Setup (1 test)
+  {
+    id: 19,
+    name: "test-starter-istanbul",
+    description: "Istanbul coverage with Test Starter",
+    prompt: "How do I set up code coverage with Istanbul in UI5 Test Starter?",
+    category: "testing",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "istanbul"
+  },
+
+  // XML Event Advanced Patterns (1 test)
+  {
+    id: 20,
+    name: "xml-event-model-binding",
+    description: "XML event with model property access",
+    prompt: "How to pass model properties to event handlers in XML views?",
+    category: "typescript-events",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "$"
+  },
+
+  // ts-interface-generator Troubleshooting (1 test)
+  {
+    id: 21,
+    name: "ts-interface-generator-issues",
+    description: "Common ts-interface-generator problems",
+    prompt: "What are common issues with ts-interface-generator in UI5 TypeScript projects?",
+    category: "typescript-events",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "interface"
+  },
+
+  // OPA5 TypeScript Pattern (1 test)
+  {
+    id: 22,
+    name: "opa5-typescript-class",
+    description: "OPA5 class-based pattern for TypeScript",
+    prompt: "How to write OPA5 page objects in TypeScript using class-based pattern?",
+    category: "testing",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "class"
+  },
+
+  // Chart Feed UID Debugging (1 test)
+  {
+    id: 23,
+    name: "chart-feed-uid-mismatch",
+    description: "Chart feed UID mismatch debugging",
+    prompt: "Why is my UI5 chart not displaying data? Feed UID mismatch error",
+    category: "data-binding",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "uid"
+  },
+
+  // Integration Cards Data Path Anti-Pattern (1 test)
+  {
+    id: 24,
+    name: "integration-cards-data-path",
+    description: "Integration Cards data path best practices",
+    prompt: "Should I use absolute paths in Integration Cards data configuration?",
+    category: "mcp-tooling",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "relative"
+  },
+
+  // Negative Test Cases (3 tests)
+  {
+    id: 25,
     name: "negative-react",
     description: "React hooks (should NOT trigger)",
     prompt: "How do I use React hooks?",
@@ -187,7 +264,7 @@ export const testCases: IntegrationTestCase[] = [
     expectedSkill: null,
   },
   {
-    id: 19,
+    id: 26,
     name: "negative-vue",
     description: "Vue.js reactivity (should NOT trigger)",
     prompt: "Vue.js reactive data binding",
@@ -195,7 +272,7 @@ export const testCases: IntegrationTestCase[] = [
     expectedSkill: null,
   },
   {
-    id: 20,
+    id: 27,
     name: "negative-python",
     description: "Python types (should NOT trigger)",
     prompt: "Python type hints tutorial",
@@ -214,5 +291,6 @@ export const testCasesByCategory = {
   "mcp-tooling": testCases.filter(tc => tc.category === "mcp-tooling"),
   "i18n": testCases.filter(tc => tc.category === "i18n"),
   "component-init": testCases.filter(tc => tc.category === "component-init"),
+  "testing": testCases.filter(tc => tc.category === "testing"),
   "negative": testCases.filter(tc => tc.category === "negative")
 };

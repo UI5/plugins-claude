@@ -123,6 +123,48 @@
       "category": "security-csp"
     },
     {
+      "prompt": "What should I set for script-src in Content Security Policy for UI5?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "security-csp"
+    },
+    {
+      "prompt": "How do I set up code coverage with Istanbul in UI5 Test Starter?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "testing"
+    },
+    {
+      "prompt": "How to pass model properties to event handlers in XML views?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "typescript-events"
+    },
+    {
+      "prompt": "What are common issues with ts-interface-generator in UI5 TypeScript projects?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "typescript-events"
+    },
+    {
+      "prompt": "How to write OPA5 page objects in TypeScript using class-based pattern?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "testing"
+    },
+    {
+      "prompt": "Why is my UI5 chart not displaying data? Feed UID mismatch error",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "data-binding"
+    },
+    {
+      "prompt": "Should I use absolute paths in Integration Cards data configuration?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "mcp-tooling"
+    },
+    {
       "prompt": "How do I use React hooks?",
       "expected_skill": null,
       "should_trigger": false,

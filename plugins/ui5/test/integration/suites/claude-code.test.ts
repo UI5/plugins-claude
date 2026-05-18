@@ -12,17 +12,29 @@ import { testCases } from "../fixtures/test-cases.js";
 import { CostTracker } from "../utils/cost-tracker.js";
 import { assertContentIncludes } from "../utils/assertions.js";
 
-// Check if Claude Code CLI is available
-let claudeAvailable = false;
-let pluginInstalled = false;
+// Test context type
+interface TestContext {
+  provider: ClaudeCodeProvider;
+  costTracker: CostTracker;
+  claudeAvailable: boolean;
+  pluginInstalled: boolean;
+}
 
-test.before(async () => {
+test.before(async (t) => {
   const provider = new ClaudeCodeProvider();
-  claudeAvailable = await provider.isAvailable();
+  const claudeAvailable = await provider.isAvailable();
 
   // Check if plugin is installed
   const pluginPath = join(homedir(), '.claude', 'plugins', 'ui5-guidelines');
-  pluginInstalled = existsSync(pluginPath);
+  const pluginInstalled = existsSync(pluginPath);
+
+  // Store in test context
+  t.context = {
+    provider,
+    costTracker: new CostTracker(),
+    claudeAvailable,
+    pluginInstalled
+  } as TestContext;
 
   if (!claudeAvailable) {
     console.warn("\n⚠️  Claude Code CLI not available");
@@ -40,12 +52,9 @@ test.before(async () => {
   }
 });
 
-// Create provider and cost tracker
-const provider = new ClaudeCodeProvider();
-const costTracker = new CostTracker();
-
 // After all tests, print summary
-test.after.always(() => {
+test.after.always((t) => {
+  const { claudeAvailable, costTracker } = t.context as TestContext;
   if (!claudeAvailable) return;
 
   console.log(costTracker.report());
@@ -56,6 +65,8 @@ for (const testCase of testCases) {
   test.serial(
     `[Claude Code] ${testCase.name}: ${testCase.description}`,
     async (t) => {
+      const { provider, costTracker, claudeAvailable, pluginInstalled } = t.context as TestContext;
+
       // Skip if Claude not available or plugin not installed
       if (!claudeAvailable || !pluginInstalled) {
         t.pass("Skipped - Claude Code CLI or plugin not available");
@@ -128,6 +139,8 @@ for (const testCase of testCases) {
 
 // Summary test
 test.serial("[Claude Code] Test Summary", (t) => {
+  const { provider, costTracker, claudeAvailable, pluginInstalled } = t.context as TestContext;
+
   if (!claudeAvailable || !pluginInstalled) {
     t.pass("Skipped - Claude Code CLI or plugin not available");
     return;
@@ -144,8 +157,16 @@ test.serial("[Claude Code] Test Summary", (t) => {
   t.log(`  Total tokens (estimated): ${totalTokens.toLocaleString()}`);
   t.log(`  Provider: ${provider.getInfo().description}`);
 
-  // At least some tests should have run
-  t.true(entries.length > 0, "Should have executed at least one test");
+  // Validate actual test count vs expected
+  const expectedExecuted = claudeAvailable && pluginInstalled ? testCases.length : 0;
+  if (entries.length !== expectedExecuted) {
+    t.log(`⚠️  Expected ${expectedExecuted} tests but executed ${entries.length}`);
+  }
+
+  // At least some tests should have run if environment is ready
+  if (claudeAvailable && pluginInstalled) {
+    t.true(entries.length > 0, "Should have executed at least one test");
+  }
 
   t.pass();
 });
