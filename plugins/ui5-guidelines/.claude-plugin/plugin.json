@@ -1,7 +1,7 @@
 {
     "name": "ui5-guidelines",
-    "version": "1.0.0",
-    "description": "Comprehensive UI5 development guidelines and best practices derived from official SAP documentation (UI5 1.136.7). Version-aware skill covering CSP directives, XML event handling ($parameters, $source, $event, $controller), Test Starter patterns, Component metadata, and version-specific APIs. Includes modern coding standards for enterprise UI5 development.",
+    "version": "3.0.0",
+    "description": "UI5 development guidelines and best practices plugin derived exclusively from official SAP UI5 guidelines. Covers async module loading, ComponentSupport initialization, data binding with OData types, i18n management, CSP compliance, TypeScript event handlers (UI5 >= 1.115.0), MCP tooling integration, CAP integration patterns, and form creation rules. Essential for writing modern, maintainable UI5 code.",
     "author": {
         "name": "SAP SE"
     },
@@ -18,8 +18,12 @@
         "guidelines",
         "best practices",
         "coding standards",
+        "async loading",
         "odata types",
-        "cap integration"
+        "data binding",
+        "cap integration",
+        "typescript",
+        "csp"
     ],
     "skills": [
         "skills/ui5-best-practices"

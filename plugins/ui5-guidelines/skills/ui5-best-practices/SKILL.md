@@ -1,16 +1,18 @@
 ---
 name: ui5-best-practices
 description: |
-  Comprehensive UI5 development best practices and coding standards skill. Use when writing UI5 applications to ensure modern, maintainable code following SAP standards. Triggers on: async module loading, data binding patterns, form creation, OData type selection, i18n management, CSP compliance, control event handling, TypeScript event types (UI5 >= 1.115.0), API reference lookups, linting validation, local development server usage, version detection, IAsyncContentCreation interface (UI5 >= 1.90.0), XML event handlers ($source, $parameters, $event, $controller), Test Starter setup, Component metadata configuration, and runtime version checking with VersionInfo.load(). Essential for writing production-ready UI5 code that follows enterprise standards.
+  UI5 development best practices and coding standards derived exclusively from official SAP UI5 guidelines. Use when writing UI5 applications to ensure modern, maintainable code following SAP standards. Covers: async module loading (sap.ui.define, ES6 imports, core:require), ComponentSupport initialization, data binding with OData types, i18n management, CSP compliance (no inline scripts), TypeScript event types (UI5 >= 1.115.0), MCP tooling (get_api_reference, run_ui5_linter), CAP integration patterns, and form creation rules (never SimpleForm, always Form with ColumnLayout).
   
-  Keywords: ui5 coding standards, ui5 best practices, async loading, sap.ui.define, sap.ui.require, data binding, odata types, simple types, i18n translation, CSP content security policy, event handlers, Button$PressEvent, Table$RowSelectionChangeEvent, ui5 linter, API reference, ui5 serve, declarative component initialization, ComponentSupport, form layout, ColumnLayout, SimpleForm, version detection, VersionInfo, IAsyncContentCreation, runtime version, detect ui5 version, XML event handling, $source, $parameters, $event, $controller, Test Starter, Component metadata, MetadataOptions, minUI5Version
+  Keywords: ui5 coding standards, async loading, sap.ui.define, data binding, odata types, i18n translation, CSP no inline scripts, TypeScript event handlers, Button$PressEvent, ui5 linter, API reference, ComponentSupport, form layout, ColumnLayout, CAP integration, cds watch
 ---
 
 # UI5 Best Practices and Coding Standards
 
 ## Overview
 
-This skill enforces enterprise-grade UI5 development standards derived from official SAP guidelines. It covers module loading, data binding, component initialization, event handling, form creation, and tooling integration.
+This skill enforces UI5 development standards derived from official SAP guidelines. It covers the four critical areas: coding guidelines, tooling integration, CAP integration, and form creation rules.
+
+---
 
 ## 1. Module Loading - CRITICAL
 
@@ -26,6 +28,11 @@ var oButton = new sap.m.Button();
 // ✅ CORRECT - Explicit dependency
 sap.ui.define(["sap/m/Button"], function(Button) {
     var oButton = new Button();
+});
+
+// ✅ CORRECT - Dynamic loading with sap.ui.require
+sap.ui.require(["sap/m/MessageBox"], function(MessageBox) {
+    MessageBox.show("Hello");
 });
 ```
 
@@ -55,25 +62,15 @@ const button: Button;
     }"/>
 ```
 
-**Why**: Ensures proper async loading, improves performance, and enables tree-shaking in production builds.
+**Why**: Ensures proper async loading, improves performance in production builds.
 
-### Dynamic Module Loading
+**Reference**: UI5 documentation page "Require Modules in XML View and Fragment"
 
-```javascript
-// ❌ Old style
-sap.ui.require(["sap/m/MessageBox"], function(MessageBox) {
-    MessageBox.show("Hello");
-});
-
-// ✅ Modern style (TypeScript/ES6)
-import("sap/m/MessageBox").then((MessageBox) => {
-    MessageBox.default.show("Hello");
-});
-```
+---
 
 ## 2. Component Initialization
 
-**ALWAYS** use `sap/ui/core/ComponentSupport` for declarative initialization:
+Use `sap/ui/core/ComponentSupport` for declarative initialization of the **initial (root)** component:
 
 ```html
 <!-- index.html -->
@@ -92,22 +89,29 @@ import("sap/m/MessageBox").then((MessageBox) => {
 </body>
 ```
 
-**Why**: Enables clean separation, supports async loading, and follows SAP's recommended pattern.
+**Reference**: UI5 documentation page "Declarative API for Initial Components"
+
+**Note:** Nested components should be managed via component usages (declared in the manifest.json of the containing component)
+
+---
 
 ## 3. Data Binding Best Practices
 
 ### Always Use Built-in Data Types
 
+**ALWAYS** use data binding in views to connect UI controls to data or i18n models.
+
 **Priority order**:
 1. OData types (`sap/ui/model/odata/type/*`) - **Preferred**
 2. Simple types (`sap/ui/model/type/*`) - Only when no OData equivalent
-3. Custom formatters - Only for unique business logic
+3. Custom types - For special two-way binding scenarios or complex validation
+4. Custom formatters - Only for unique business logic (one-way binding)
 
 ```xml
 <!-- ❌ WRONG - Custom formatter for standard formatting -->
 <Text text="{path: 'price', formatter: '.formatCurrency'}"/>
 
-<!-- ✅ CORRECT - Use OData type -->
+<!-- ✅ CORRECT - Use OData type with format options -->
 <Text text="{
     path: 'price',
     type: 'sap.ui.model.odata.type.Decimal',
@@ -128,10 +132,62 @@ import("sap/m/MessageBox").then((MessageBox) => {
 ```
 
 **Common OData Types**:
-- `sap/ui/model/odata/type/Decimal` - Numbers with decimals
-- `sap/ui/model/odata/type/String` - Text with length constraints
-- `sap/ui/model/odata/type/DateTime` - Date and time
-- `sap/ui/model/odata/type/Boolean` - True/false values
+- `sap.ui.model.odata.type.Decimal` - Numbers with decimals
+- `sap.ui.model.odata.type.String` - Text with length constraints
+- `sap.ui.model.odata.type.DateTime` - Date and time
+
+**Common Simple Types** (use only when no OData equivalent):
+- `sap.ui.model.type.DateInterval` - Date ranges
+- `sap.ui.model.type.FileSize` - File size formatting
+
+**Example**: For number formatting with thousands separator, prefer `sap.ui.model.odata.type.Decimal` with `formatOptions: {groupingEnabled: true}` over `sap.ui.model.type.Integer` or a custom formatter.
+
+### When to Use Custom Types
+
+Custom types are needed for **special two-way binding scenarios** where built-in types don't provide the required validation or conversion logic.
+
+**Example: Custom Type for Email Validation with Two-Way Binding**
+
+```javascript
+// controller/EmailType.js
+sap.ui.define(["sap/ui/model/SimpleType"], function(SimpleType) {
+    return SimpleType.extend("my.app.type.EmailType", {
+        formatValue: function(oValue) {
+            return oValue;
+        },
+        parseValue: function(oValue) {
+            return oValue;
+        },
+        validateValue: function(oValue) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (oValue && !emailRegex.test(oValue)) {
+                throw new sap.ui.model.ValidateException("Invalid email format");
+            }
+        }
+    });
+});
+```
+
+**Usage in View**:
+```xml
+<!-- ❌ WRONG - Formatter doesn't work for two-way binding validation -->
+<Input value="{path: 'email', formatter: '.validateEmail'}"/>
+
+<!-- ✅ CORRECT - Custom type enables two-way binding with validation -->
+<Input 
+    core:require="{EmailType: 'my/app/type/EmailType'}"
+    value="{
+        path: 'email',
+        type: 'EmailType'
+    }"/>
+```
+
+**Why Custom Types**:
+- ✅ Two-way binding support (formatValue + parseValue + validateValue)
+- ✅ Real-time validation as user types
+- ✅ Model updates immediately on valid input
+- ❌ Custom formatters only work for one-way (display) binding
+
 
 ### Data Binding in Views
 
@@ -150,12 +206,272 @@ import("sap/m/MessageBox").then((MessageBox) => {
 <Text text="{= ${quantity} * ${price} }" visible="{= ${stock} > 0 }"/>
 ```
 
-## 4. Form Creation Rules
+---
 
-### Never Use SimpleForm Unless Explicitly Requested
+## 4. Internationalization (i18n)
+
+### Translation Workflow Guidelines
+
+When modifying `.properties` files, follow the appropriate workflow based on your project type:
+
+**For development and testing**:
+- Update `i18n.properties` (base file) only
+- Changes will be reflected immediately for development
+
+When modifying `.properties` files, **ALWAYS** apply changes to all relevant locales to ensure consistency across different language versions.
+
+```bash
+# If you add to i18n.properties:
+title=Customer List
+
+# Also add to all existing translation files:
+i18n_en.properties
+i18n_de.properties
+i18n_fr.properties
+# ... etc.
+```
+
+**Why**: Maintains consistency across languages and prevents missing translations.
+
+**Production translation workflows**:
+- **SAP S/4HANA apps**: **NEVER** manually edit localized files (`i18n_de.properties`, `i18n_fr.properties`, etc.)
+  - Translation is handled through SAP's internal translation process
+- **Apps using SAP Translation Hub or Translation Export/Import (TEW)**: **DO NOT** touch localized files
+  - Translations are generated automatically from the base file
+- **Manually translated apps only**: Apply changes to all locale files to maintain consistency
+
+**Why**: Professional translation workflows generate localized files from the base `i18n.properties` file. Manual edits to localized files will be overwritten during the translation process.
+
+---
+
+## 5. Security - Content Security Policy
+
+### Never Use Inline Scripts or Styles
+
+**NEVER** use inline scripts or inline styles in HTML. They violate the recommended CSP settings for UI5 applications.
+
+```html
+<!-- ❌ WRONG - Violates CSP -->
+<script>
+    alert("Hello");
+</script>
+
+<div style="color: red;">Styled text</div>
+
+<!-- ✅ CORRECT - External files -->
+<script src="controller/Main.controller.js"></script>
+<link rel="stylesheet" href="css/style.css">
+
+<!-- ✅ CORRECT - CSS classes -->
+<div class="errorText">Styled text</div>
+```
+
+**Requirements**:
+- All application logic must reside in dedicated JS or TS files
+- All styling must reside in dedicated CSS files and use CSS classes/IDs
+- Inline `<script>` and inline `style` attributes violate CSP
+
+**Reference**: UI5 documentation page "Content Security Policy"
+
+---
+
+## 6. TypeScript Event Handling (UI5 >= 1.115.0)
+
+### Use Control-Specific Event Types
+
+For **UI5 1.115.0 and above**, import and use the specific event type from the control's module.
+
+**Pattern**: `<ControlName>$<EventName>Event` (notice the "Event" suffix)
+
+```typescript
+// ✅ CORRECT - Import specific event type
+import { Button$PressEvent } from "sap/m/Button";
+import { Table$RowSelectionChangeEvent } from "sap/ui/table/Table";
+import Controller from "sap/ui/core/mvc/Controller";
+
+export default class MainController extends Controller {
+    public onPress(event: Button$PressEvent): void {
+        const button = event.getSource();  // Correctly typed as Button
+        // ...
+    }
+    
+    public onRowSelectionChange(event: Table$RowSelectionChangeEvent): void {
+        // Correctly typed: getParameter is known and return value inferred
+        const selectedContext = event.getParameter("rowContext");
+        // ...
+    }
+}
+```
+
+### Fallback for Older Versions
+
+**UI5 < 1.115.0**: Control-specific event types are **NOT available**. Use the generic Event type:
+
+```typescript
+import Event from "sap/ui/base/Event";
+import Controller from "sap/ui/core/mvc/Controller";
+
+export default class MainController extends Controller {
+    public onPress(event: Event): void {
+        // Generic Event type for UI5 < 1.115.0
+        // ...
+    }
+}
+```
+
+**Benefits**: Static type checking and autocompletion for event parameters without manual casting.
+
+---
+
+## 7. MCP Tooling Integration
+
+### API Lookup
+
+**ALWAYS** use the `get_api_reference` tool to get information on UI5 controls and APIs. This provides direct access to the official UI5 API Reference for the UI5 version in use.
+
+```
+Usage: get_api_reference with project path
+Returns: Official API documentation for controls, classes, and namespaces
+```
+
+### Code Validation
+
+**ALWAYS** use the `run_ui5_linter` tool to identify issues. It detects deprecated APIs, accessibility issues, and other potential bugs.
+
+```
+Usage: run_ui5_linter with project path
+Returns: List of issues with severity levels
+```
+
+### Code Fixes
+
+To apply fixes suggested by the linter:
+1. **ALWAYS** confirm with the user first
+2. Use the `fix` parameter of the `run_ui5_linter` tool
+3. The tool automatically corrects some identified issues
+4. Manually fix remaining issues using the context information provided
+
+### Local Server Behavior
+
+When interacting with the UI5 CLI's development server:
+
+**CRITICAL**: The server does **NOT** serve a default index file.
+
+```bash
+# ❌ WRONG - Will not work
+http://localhost:8080/
+
+# ✅ CORRECT - Must reference files by full path
+http://localhost:8080/index.html
+```
+
+### Code Quality Checks
+
+After making code changes, **ALWAYS** run the project's linter if available:
+
+```bash
+npm run lint           # Standard
+npm run eslint         # Alternative
+eslint .               # Direct ESLint call
+npm run ui5-lint       # UI5 Linter if configured
+ui5lint .              # UI5 Linter if available as CLI tool
+```
+
+**Why**: Linters catch common issues before committing:
+- Missing imports or type errors
+- Formatting inconsistencies
+- Deprecated API usage
+- Code style violations
+
+Fix all linting errors before committing.
+
+---
+
+## 8. CAP Integration
+
+When creating a UI5 project within a CAP (Cloud Application Programming Model) project:
+
+### Project Location
+
+**ALWAYS** create UI5 projects within the `app/` directory of the CAP project root.
+
+```
+cap-project/
+├── app/                    # ← UI5 apps go here
+│   └── my-ui5-app/
+├── srv/                    # CAP services
+├── db/                     # Database models
+└── package.json
+```
+
+### Service Information
+
+**Get service information**:
+- If CDS tools are available: Use them to get definitions, services, and endpoints
+- If no CDS tools: Run these commands:
+  ```bash
+  cds compile '*'                        # Get definitions
+  cds compile '*' --to serviceinfo       # Get services and endpoints
+  ```
+
+### Service Integration
+
+When creating the UI5 project, **ALWAYS** provide:
+- Absolute OData V4 service URL
+- Target entity set
+
+### Plugin Installation
+
+**ALWAYS** run in CAP project root:
+```bash
+npm i -D cds-plugin-ui5
+```
+
+This plugin automatically handles serving the UI5 applications.
+
+### Running the Server
+
+```bash
+# ❌ WRONG - Never run separate UI5 server
+cd app/my-ui5-app
+ui5 serve                    # Don't do this!
+npm start                    # Don't do this!
+
+# ✅ CORRECT - Run from CAP project root
+cds watch                    # Serves both backend and UI5 apps
+# or
+cds run                      # Alternative command
+```
+
+**Why**: Single command serves both backend services and all UI5 applications from the same origin (`http://localhost:4004`).
+
+### Data Connection
+
+**NEVER** configure `ui5-middleware-simpleproxy` in `ui5.yaml`:
+
+```yaml
+# ❌ WRONG - No proxy needed
+server:
+  customMiddleware:
+    - name: ui5-middleware-simpleproxy    # Don't add this!
+```
+
+**Why**: `cds watch` ensures UI and service are served from the same origin, making a proxy unnecessary.
+
+### Accessing the App
+
+Check the CAP launch page (typically `http://localhost:4004`) for:
+- List of available services
+- Links to UI5 applications
+
+---
+
+## 9. Form Creation Rules
+
+### Never Use SimpleForm (Unless Explicitly Requested)
 
 ```xml
-<!-- ❌ AVOID - SimpleForm (unless user explicitly requests it) -->
+<!-- ❌ AVOID - SimpleForm -->
 <form:SimpleForm>
     <Label text="Name"/>
     <Input value="{name}"/>
@@ -183,481 +499,26 @@ import("sap/m/MessageBox").then((MessageBox) => {
 </form:Form>
 ```
 
-**Default Columns**:
-- M-size: 2 columns
-- L-size: 3 columns
-- XL-size: 4 columns
-
-## 5. Internationalization (i18n)
-
-### Apply Changes to ALL Locales
-
-When modifying `.properties` files, **ALWAYS** update all locale variants:
-
-```bash
-# If you add to i18n.properties:
-title=Customer List
-
-# Also add to:
-i18n_en.properties
-i18n_de.properties
-i18n_fr.properties
-# ... all existing locale files
-```
-
-**Why**: Maintains consistency across languages and prevents missing translations.
-
-## 6. Security - Content Security Policy
-
-### Never Use Inline Scripts
-
-```html
-<!-- ❌ WRONG - Violates CSP -->
-<script>
-    alert("Hello");
-</script>
-
-<!-- ✅ CORRECT - External file -->
-<script src="controller/Main.controller.js"></script>
-```
-
-**All application logic must reside in dedicated JS/TS files** to comply with UI5's recommended CSP settings.
-
-## 7. TypeScript Event Handling (UI5 >= 1.115.0)
-
-### Use Control-Specific Event Types
-
-For **UI5 1.115.0 and above**, use typed event classes:
-
-```typescript
-import { Button$PressEvent } from "sap/m/Button";
-import { Table$RowSelectionChangeEvent } from "sap/ui/table/Table";
-
-export default class MainController extends Controller {
-    // ✅ CORRECT - Typed event
-    public onPress(event: Button$PressEvent): void {
-        const button = event.getSource();  // Correctly typed as Button
-        // ...
-    }
-    
-    public onRowSelectionChange(event: Table$RowSelectionChangeEvent): void {
-        const context = event.getParameter("rowContext");  // Typed parameter
-        // ...
-    }
-}
-```
-
-### Fallback for UI5 < 1.115.0
-
-```typescript
-import Event from "sap/ui/base/Event";
-
-public onPress(event: Event): void {
-    // Use generic Event type
-}
-```
-
-**Event Type Pattern**: `{ControlName}${EventName}Event`
-- Button press → `Button$PressEvent`
-- Table selection → `Table$RowSelectionChangeEvent`
-- Input change → `Input$ChangeEvent`
-
-## 8. MCP Tooling Integration
-
-### API Reference Lookup
-
-**ALWAYS** use the `get_api_reference` MCP tool for API documentation:
-
-```bash
-# Get information on sap.m.Table
-mcp get_api_reference sap.m.Table /path/to/project
-```
-
-This provides version-specific API documentation for your project's UI5 version.
-
-### Code Validation
-
-**ALWAYS** lint code before committing:
-
-```bash
-# Run UI5 linter
-mcp run_ui5_linter /path/to/project
-
-# Auto-fix issues (confirm with user first)
-mcp run_ui5_linter /path/to/project --fix
-```
-
-Detects:
-- Deprecated APIs
-- Accessibility issues
-- Best practice violations
-- Security vulnerabilities
-
-### Local Development Server
-
-**CRITICAL**: UI5 CLI server does **NOT** serve default index files.
-
-```bash
-# ❌ WRONG - Returns 404
-http://localhost:8080/
-
-# ✅ CORRECT - Specify full path
-http://localhost:8080/index.html
-http://localhost:8080/test/testsuite.qunit.html
-```
-
-## 9. CAP Integration
-
-When creating UI5 projects **within a CAP project**:
-
-### Project Structure
-```
-cap-project/
-├── app/              ← UI5 projects go here
-│   ├── customers/
-│   └── orders/
-├── srv/
-├── db/
-└── package.json
-```
-
-### Setup Process
-
-1. **Create in `app/` directory**
-```bash
-cd app
-yo @sap/fiori
-```
-
-2. **Install CAP Plugin**
-```bash
-# In CAP root directory
-npm i -D cds-plugin-ui5
-```
-
-3. **Get Service Information**
-```bash
-# List definitions
-cds compile '*'
-
-# Get service endpoints
-cds compile '*' --to serviceinfo
-```
-
-4. **Run from CAP Root**
-```bash
-# ❌ NEVER run ui5 serve in app subfolder
-# ✅ ALWAYS run from CAP root
-cds watch
-```
-
-**Why**: `cds watch` serves both backend and UI on the same origin (http://localhost:4004), eliminating proxy configuration needs.
-
-### No Proxy Needed
-
-**NEVER** configure `ui5-middleware-simpleproxy` in `ui5.yaml` for local CAP services:
-
-```yaml
-# ❌ WRONG - Unnecessary proxy
-server:
-  customMiddleware:
-    - name: ui5-middleware-simpleproxy
-      # Not needed for CAP!
-```
-
-`cds watch` handles routing automatically.
-
-## 10. Common Patterns
-
-### Getting Router
-```javascript
-this.getOwnerComponent().getRouter()
-```
-
-### Getting Model
-```javascript
-this.getView().getModel()           // Default model
-this.getView().getModel("i18n")    // Named model
-```
-
-### Navigation
-```javascript
-this.getOwnerComponent().getRouter().navTo("detail", {
-    objectId: "123"
-});
-```
-
-### Creating Controls Programmatically
-```javascript
-import Button from "sap/m/Button";
-import MessageBox from "sap/m/MessageBox";
-
-const oButton = new Button({
-    text: "Click Me",
-    press: () => {
-        MessageBox.show("Hello World");
-    }
-});
-```
-
-## 11. XML Event Handling Patterns
-
-**Overview**: UI5 XML views support sophisticated event handler binding with parameter passing, special named models ($parameters, $source, $event, $controller), and context control.
-
-### Essential Patterns
-
-**Dot Notation for Controller Methods**:
-```xml
-<Button text="Save" press=".onSave"/>
-```
-
-**Parameter Passing**:
-```xml
-<Button press=".doSomething(${/productId}, ${view>/mode}, $event)"/>
-```
-
-**Special Models**:
-- `$parameters` - Access event parameters
-- `$source` - Access the event source control  
-- `$event` - Reference the event object
-- `$controller` - Access controller properties
-
-### Complete Guide
-
-For comprehensive XML event patterns including core:require, JavaScript literals, model property access, "this" context control with .call(), and complex examples, see [references/xml-event-handling-guide.md](references/xml-event-handling-guide.md).
-
-## 12. Component Metadata for UI5 Version Detection
-
-### Detecting UI5 Version at Runtime
-
-**In Component.js**
-```javascript
-import Component from "sap/ui/core/Component";
-import VersionInfo from "sap/ui/VersionInfo";
-
-export default class extends Component {
-    public static metadata = {
-        manifest: "json",
-        interfaces: ["sap.ui.core.IAsyncContentCreation"]  // >= 1.90.0
-    };
-
-    public async init(): Promise<void> {
-        super.init();
-        
-        // Check UI5 version
-        const versionInfo = await VersionInfo.load();
-        const ui5Version = versionInfo.version;  // e.g., "1.136.7"
-        
-        if (this._isVersionGreaterThan(ui5Version, "1.115.0")) {
-            // Use control-specific event types (Button$PressEvent)
-        }
-    }
-    
-    private _isVersionGreaterThan(current: string, min: string): boolean {
-        return current.localeCompare(min, undefined, { numeric: true }) >= 0;
-    }
-}
-```
-
-### IAsyncContentCreation Interface
-
-**UI5 >= 1.90.0**: Use this marker interface to enable fully async content creation:
-
-```javascript
-// Component.js
-public static metadata = {
-    manifest: "json",
-    interfaces: ["sap.ui.core.IAsyncContentCreation"]
-};
-```
-
-**Benefits**:
-- Implicit `async: true` for rootView and router
-- Nested views handled asynchronously
-- Stricter error handling during view processing
-
-### manifest.json Version-Specific Patterns
-
-**Minimum UI5 Version Specification**
-```json
-{
-  "sap.ui5": {
-    "dependencies": {
-      "minUI5Version": "1.115.0",
-      "libs": {
-        "sap.m": {},
-        "sap.ui.core": {}
-      }
-    }
-  }
-}
-```
-
-**Library Lazy Loading (UI5 >= 1.71.0)**
-```json
-{
-  "sap.ui5": {
-    "dependencies": {
-      "libs": {
-        "sap.f": {},               // Preload
-        "sap.suite.ui.commons": {  // Manual preload
-          "lazy": true
-        }
-      }
-    }
-  }
-}
-```
-
-## 13. Content Security Policy (CSP) - Directive Reference
-
-**Overview**: CSP protects against XSS by controlling resource sources. UI5 applications must configure specific directives for framework libraries.
-
-### Essential Directives
-
-| Directive | Purpose | Required Values |
-|-----------|---------|----------------|
-| `script-src` | JavaScript sources | `'self'`, `'unsafe-eval'` (for some libs) |
-| `style-src` | CSS sources | `'self'`, `'unsafe-inline'` (for theming) |
-| `font-src` | Font sources | `'self'`, `data:` |
-| `img-src` | Image sources | `'self'`, `https:`, `data:` |
-
-### Quick Example
-
-```html
-<meta http-equiv="Content-Security-Policy" 
-      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'">
-```
-
-### Complete Reference
-
-For the full directive table, library-specific requirements (sap.ui.richtexteditor, sap.ushell), Report-Only testing workflow, and compliance checklist, see [references/csp-directive-reference.md](references/csp-directive-reference.md).
-
-## 14. Modern Test Setup (Test Starter)
-
-**Overview**: Test Starter (UI5 >= 1.113.0) provides a modern test orchestration pattern with testsuite.qunit.html/js, individual test files, and optional code coverage.
-
-### Essential Structure
-
-```
-webapp/test/
-├── testsuite.qunit.html       # Entry point
-├── testsuite.qunit.js          # Test suite configuration
-└── unit/
-    ├── AllTests.js             # Test registry
-    └── controller/
-        └── Main.controller.test.js
-```
-
-### Quick Example (testsuite.qunit.js)
-
-```javascript
-sap.ui.define(function() {
-    "use strict";
-    return {
-        name: "QUnit test suite",
-        defaults: {
-            page: "ui5://test-resources/{name}.qunit.html"
-        },
-        tests: {
-            "unit/AllTests": {
-                title: "Unit Tests"
-            }
-        }
-    };
-});
-```
-
-### Complete Guide
-
-For full Test Starter patterns, QUnit 2+ configuration, Istanbul code coverage setup (UI5 >= 1.113.0), and migration from legacy test setup, see [references/test-starter-guide.md](references/test-starter-guide.md).
-
-## 15. Validation Checklist
-
-Before submitting code, ensure:
-
-- [ ] No global UI5 object access (`sap.*`)
-- [ ] All dependencies explicitly declared
-- [ ] ComponentSupport used for initialization
-- [ ] Data binding uses OData types (not custom formatters)
-- [ ] i18n changes applied to all locales
-- [ ] No inline scripts (CSP compliance)
-- [ ] CSP directives match library requirements
-- [ ] TypeScript events use control-specific types (UI5 >= 1.115.0)
-- [ ] Forms use `ColumnLayout` (not `SimpleForm`)
-- [ ] UI5 linter passes without errors
-- [ ] Local server accessed with full paths (`/index.html`)
-- [ ] XML event handlers use dot notation for controller methods
-- [ ] Test setup uses Test Starter pattern (QUnit 2+)
-- [ ] Component metadata includes IAsyncContentCreation (UI5 >= 1.90.0)
-
-## 16. Error Prevention
-
-### Common Mistakes
-
-1. **Forgetting core:require in XML**
-```xml
-<!-- ❌ WRONG - Type not loaded -->
-<Input value="{path: 'price', type: 'Currency'}"/>
-
-<!-- ✅ CORRECT -->
-<Input core:require="{Currency: 'sap/ui/model/type/Currency'}"
-       value="{path: 'price', type: 'Currency'}"/>
-```
-
-2. **Using wrong event type version**
-```typescript
-// Check UI5 version first!
-// >= 1.115.0 → Use Button$PressEvent
-// < 1.115.0  → Use Event
-```
-
-3. **CAP proxy configuration**
-```yaml
-# If using CAP with cds watch, do NOT add proxy middleware
-```
-
-4. **XML event handler parameters without $event**
-```xml
-<!-- ❌ WRONG - Event object not accessible -->
-<Button press=".onPress('param')"/>
-<!-- Handler receives 'param' but not event object -->
-
-<!-- ✅ CORRECT - Explicit event object -->
-<Button press=".onPress($event, 'param')"/>
-```
-
-5. **CSP violation from deprecated APIs**
-```javascript
-// ❌ WRONG - Requires 'unsafe-eval'
-setTimeout("myFunction()", 1000);
-
-// ✅ CORRECT
-setTimeout(() => myFunction(), 1000);
-```
-
-## Related Skills
-
-- **ui5-typescript-expert**: For TypeScript conversion and migration
-- **ui5-integration-cards**: For Integration Card development
-- **ui5-cap-integration**: For deep CAP integration patterns
-- **sap-fiori-tools**: For rapid Fiori application scaffolding
-
-## Documentation Reference
-
-- UI5 Documentation: https://ui5.sap.com
-- CAP Documentation: https://cap.cloud.sap
-- UI5 Linter: https://github.com/SAP/ui5-linter
+### Default Column Configuration
+
+**ALWAYS** use these defaults unless requested differently:
+- **M-size**: 2 columns
+- **L-size**: 3 columns
+- **XL-size**: 4 columns
 
 ---
 
-**Version**: 2.0.0  
-**Last Updated**: 2026-05-11  
-**Based on**: UI5 Documentation 1.136.7  
-**Compatible with**: UI5 1.71.0+, CAP 6.0+
+## Documentation References
 
-**Version-Specific Enhancements**:
-- UI5 >= 1.115.0: Control-specific event types (Button$PressEvent)
-- UI5 >= 1.90.0: IAsyncContentCreation interface
-- UI5 >= 1.113.0: Istanbul code coverage (qunit-coverage-istanbul)
-- UI5 1.136.7: CSP directive requirements, Test Starter patterns
+For additional information, consult these UI5 documentation pages:
+- "Require Modules in XML View and Fragment"
+- "Declarative API for Initial Components"
+- "Content Security Policy"
+- Official UI5 API Reference (use `get_api_reference` tool)
+
+---
+
+**Version**: 3.0.0  
+**Based on**: Official UI5 Development Guidelines  
+**Source**: /Users/i326076/SAPDevelop/mcp-server/resources/guidelines.md  
+**Last Updated**: 2026-05-15
