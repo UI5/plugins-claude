@@ -25,7 +25,5 @@
         "typescript",
         "csp"
     ],
-    "skills": [
-        "skills/ui5-best-practices"
-    ]
+    "skills": ["skills/ui5-best-practices"]
 }
