@@ -133,33 +133,34 @@ return (hasMinPatterns || hasCriticalKeyword) ? 'ui5-best-practices' : null;
 
 **Status**: ✅ Implemented (Phase 1)
 
-### Issue #4: High Timeout Rate 🟡
+### Issue #4: High Timeout Rate ✅
 **Problem**: 25% tests timed out
 
-**Solution**: Increased timeout to 120s
+**Solution**: Increased timeout to 120s + retry logic
 
-**Status**: 🟡 Partially addressed (Phase 1)
-**Remaining**: Add retry logic (Phase 2)
+**Status**: ✅ Fully addressed (Phase 1 + Phase 2)
 
 ---
 
 ## Remaining Improvements (Phases 2-4)
 
-### Phase 2: Reliability (Next)
-- ⏳ Add retry logic (2 retries for timeouts)
-- ⏳ Rate limiting detection and backoff
-- ⏳ Capture full responses for failed tests
-- ⏳ Verbose logging mode (`TEST_VERBOSE=1`)
+### Phase 2: Reliability (COMPLETE ✅)
+- ✅ Add retry logic (2 retries for timeouts)
+- ✅ Rate limiting detection and backoff (30s delay)
+- ✅ Capture full responses for failed tests (.test-output/)
+- ✅ Verbose logging mode (`TEST_VERBOSE=1`)
 
-**Expected**: 5-10% → <5% timeout rate
+**Expected**: 5-10% → <5% timeout rate  
+**See**: [PHASE_3.2_COMPLETE.md](./PHASE_3.2_COMPLETE.md)
 
-### Phase 3: Observability
+### Phase 3: Observability (Next)
 - ⏳ Generate JSON test reports
 - ⏳ Create HTML dashboard
 - ⏳ Skill activation verification test
 - ⏳ Check stderr for skill activation logs
 
-**Expected**: Better debugging capabilities
+**Expected**: Better debugging capabilities  
+**Estimated**: 3-4 hours
 
 ### Phase 4: Long Term
 - ⏳ Direct Anthropic API testing option

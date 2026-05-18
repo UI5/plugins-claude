@@ -15,6 +15,7 @@ export interface IntegrationTestCase {
 export interface TestConfig {
   timeout?: number;
   model?: string;
+  maxRetries?: number;
 }
 
 export interface IntegrationTestResult {

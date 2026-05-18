@@ -12,6 +12,9 @@ export class ClaudeCodeProvider extends BaseProvider {
 
   // Configuration constants
   private static readonly CHARS_PER_TOKEN_ESTIMATE = 4;
+  private static readonly DEFAULT_RETRY_COUNT = 2;
+  private static readonly RETRY_DELAY_MS = 5000;
+  private static readonly RATE_LIMIT_DELAY_MS = 30000;
 
   async isAvailable(): Promise<boolean> {
     return new Promise((resolve) => {
@@ -30,8 +33,72 @@ export class ClaudeCodeProvider extends BaseProvider {
     });
   }
 
+  /**
+   * Run test with retry logic for timeouts and rate limiting
+   */
   async runTest(prompt: string, config: TestConfig = {}): Promise<IntegrationTestResult> {
+    const maxRetries = config.maxRetries ?? ClaudeCodeProvider.DEFAULT_RETRY_COUNT;
+    const verbose = process.env.TEST_VERBOSE === '1';
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      if (verbose && attempt > 0) {
+        console.log(`\n🔄 Retry attempt ${attempt}/${maxRetries} for prompt: "${prompt.substring(0, 50)}..."`);
+      }
+
+      const result = await this.runTestOnce(prompt, config, verbose);
+
+      // Success - return immediately
+      if (result.success) {
+        return result;
+      }
+
+      // Check if we should retry
+      const isTimeout = result.error?.includes('Timeout');
+      const isRateLimit = result.error?.includes('429') || result.error?.includes('rate limit');
+      const shouldRetry = (isTimeout || isRateLimit) && attempt < maxRetries;
+
+      if (!shouldRetry) {
+        // Final attempt failed or non-retryable error
+        return result;
+      }
+
+      // Wait before retry
+      const delayMs = isRateLimit
+        ? ClaudeCodeProvider.RATE_LIMIT_DELAY_MS
+        : ClaudeCodeProvider.RETRY_DELAY_MS;
+
+      if (verbose) {
+        const reason = isRateLimit ? 'rate limiting' : 'timeout';
+        console.log(`⏳ Waiting ${delayMs / 1000}s before retry (${reason} detected)...`);
+      }
+
+      await this.sleep(delayMs);
+    }
+
+    // Should never reach here, but TypeScript needs a return
+    return {
+      skillTriggered: null,
+      responseContent: '',
+      tokensUsed: 0,
+      latencyMs: 0,
+      cost: 0,
+      success: false,
+      error: 'Max retries exceeded'
+    };
+  }
+
+  /**
+   * Single test execution attempt (no retry logic)
+   */
+  private async runTestOnce(prompt: string, config: TestConfig, verbose: boolean): Promise<IntegrationTestResult> {
     const startTime = Date.now();
+
+    if (verbose) {
+      console.log(`\n🔍 Test: "${prompt}"`);
+      console.log(`⏱️  Start time: ${new Date(startTime).toISOString()}`);
+      console.log(`🔌 Environment: CLAUDE_PLUGINS=${process.env.CLAUDE_PLUGINS || 'ui5-guidelines'}`);
+      console.log(`⏰ Timeout: ${config.timeout || 60000}ms`);
+    }
 
     return new Promise((resolve) => {
       // Prevent multiple resolve() calls
@@ -230,5 +297,12 @@ export class ClaudeCodeProvider extends BaseProvider {
       requiresApiKey: false,
       supportedModels: ["default (Claude Sonnet 4.6)"],
     };
+  }
+
+  /**
+   * Sleep helper for retry delays
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }

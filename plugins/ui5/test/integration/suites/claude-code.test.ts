@@ -11,11 +11,13 @@ import { ClaudeCodeProvider } from "../providers/claude-code.js";
 import { testCases } from "../fixtures/test-cases.js";
 import { CostTracker } from "../utils/cost-tracker.js";
 import { assertContentIncludes } from "../utils/assertions.js";
+import { OutputCapture } from "../utils/output-capture.js";
 
 // Test context type
 interface TestContext {
   provider: ClaudeCodeProvider;
   costTracker: CostTracker;
+  outputCapture: OutputCapture;
   claudeAvailable: boolean;
   pluginInstalled: boolean;
 }
@@ -32,6 +34,7 @@ test.before(async (t) => {
   t.context = {
     provider,
     costTracker: new CostTracker(),
+    outputCapture: new OutputCapture(),
     claudeAvailable,
     pluginInstalled
   } as TestContext;
@@ -65,7 +68,7 @@ for (const testCase of testCases) {
   test.serial(
     `[Claude Code] ${testCase.name}: ${testCase.description}`,
     async (t) => {
-      const { provider, costTracker, claudeAvailable, pluginInstalled } = t.context as TestContext;
+      const { provider, costTracker, outputCapture, claudeAvailable, pluginInstalled } = t.context as TestContext;
 
       // Skip if Claude not available or plugin not installed
       if (!claudeAvailable || !pluginInstalled) {
@@ -76,6 +79,7 @@ for (const testCase of testCases) {
       // Run the test
       const result = await provider.runTest(testCase.prompt, {
         timeout: 120000, // 120s timeout (increased from 90s)
+        maxRetries: 2,   // Retry up to 2 times for timeouts/rate limits
       });
 
       // Track metrics
@@ -93,6 +97,17 @@ for (const testCase of testCases) {
 
       // Assert: Test should succeed
       if (!result.success) {
+        // Capture full output for failed test
+        const outputPath = await outputCapture.saveFailedTest({
+          testId: testCase.id,
+          testName: testCase.name,
+          prompt: testCase.prompt,
+          response: result.responseContent,
+          error: result.error,
+          timestamp: new Date().toISOString(),
+          skillTriggered: result.skillTriggered,
+        });
+        t.log(`📄 Full response saved to: ${outputPath}`);
         t.fail(`Test execution failed: ${result.error}`);
         return;
       }
@@ -116,6 +131,18 @@ for (const testCase of testCases) {
           t.log(`❌ Expected: ${testCase.expectedSkill}`);
           t.log(`   Got: ${result.skillTriggered || "none"}`);
           t.log(`Response preview: ${result.responseContent.substring(0, 200)}...`);
+
+          // Capture full response for skill detection failure
+          const outputPath = await outputCapture.saveFailedTest({
+            testId: testCase.id,
+            testName: testCase.name,
+            prompt: testCase.prompt,
+            response: result.responseContent,
+            error: `Skill detection failed: expected ${testCase.expectedSkill}, got ${result.skillTriggered || 'none'}`,
+            timestamp: new Date().toISOString(),
+            skillTriggered: result.skillTriggered,
+          });
+          t.log(`📄 Full response saved to: ${outputPath}`);
         }
         t.is(
           result.skillTriggered,
