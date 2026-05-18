@@ -133,7 +133,6 @@ test('plugin directory structure is clean', (t) => {
     'dist',
     'TEST_REFACTOR_SUMMARY.md',
     'PLAN.md',
-    'INTEGRATION_TESTS.md',
     '.env',
     '.env.example',
     'package-lock.json'

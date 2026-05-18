@@ -89,19 +89,20 @@ npm run test:triggering     # Simulated keyword matching
 
 ---
 
-### Level 3: Integration Tests (Live API)
+### Level 3: Integration Tests (Claude Code CLI)
 
-**Purpose**: Test actual Claude model behavior with real API calls.
+**Purpose**: Test actual Claude model behavior using Claude Code CLI with real API calls.
 
 **What it tests**:
-- ✅ Real Claude skill triggering
+- ✅ Real Claude skill triggering (heuristic detection via UI5 patterns)
 - ✅ Response quality and adherence to guidelines
-- ✅ Token usage and latency tracking
+- ✅ Token usage estimation and latency tracking
 
 **What it CANNOT test**:
-- ❌ User-specific contexts (competing plugins, custom settings)
-- ❌ All possible user phrasings
-- ❌ Future model versions
+- ❌ **Response quality** - Tests only check for keyword presence, not correctness
+- ❌ **Exact triggering rate** - Uses heuristic detection, not Claude's internal state
+- ❌ **User-specific contexts** - Tests run in isolation without conversation history
+- ❌ **All possible phrasings** - Limited test case coverage
 
 **Test Categories** (20 test cases):
 1. **Module Loading** (2 cases): `sap.ui.define`, `core:require`
@@ -115,25 +116,85 @@ npm run test:triggering     # Simulated keyword matching
 9. **Component Init** (1 case): ComponentSupport
 10. **Negative Cases** (3 cases): React, Vue, Python
 
-**Provider**:
-- **Claude Code CLI**: Real Claude Code environment (free, local testing)
+**Provider**: Claude Code CLI (free, local testing)
 
 **Run**:
 ```bash
-npm run test:integration:claude    # Claude Code CLI (~5-10 min, free)
+cd plugins/ui5-guidelines
+npm run test:integration:claude
 ```
 
 **Expected output**:
 ```
-✅ Integration: 20/20 passing (100%)
-⏱️  Duration: ~5-10 minutes
+✅ [Claude Code] async-module-loading: Async module loading with sap.ui.define
+   ⏱️  4523ms | 🔤 1247 tokens
+✅ [Claude Code] xml-core-require: XML core:require for types
+   ⏱️  3891ms | 🔤 1056 tokens
+...
 
 💰 Cost Summary:
   Provider: claude-code
   Tests run: 20
   Total tokens (estimated): 24,567
   Total cost: $0.0000
+
+20 tests passed
 ```
+
+**If Claude Code CLI not installed**:
+```
+⚠️  Claude Code CLI not available
+   Install from: https://claude.ai/code
+   Skipping all Claude Code integration tests
+
+20 tests passed (all skipped)
+```
+
+**Duration**: ~5-10 minutes for full suite (20 tests × ~20-30s per test)
+
+#### How Integration Tests Work
+
+**1. Skill Detection** - Tests detect if the UI5 skill was triggered by looking for multiple UI5-specific patterns in Claude's response:
+
+```typescript
+const ui5Patterns = [
+  'sap.ui.define',
+  'sap.ui.require',
+  'sap/m/',
+  'columnlayout',
+  'button$pressevent',
+  'cds watch',
+  // ... etc
+];
+
+// If response contains 2+ patterns → skill triggered
+```
+
+**2. Content Validation** - Tests verify that Claude's response contains expected content:
+
+```typescript
+// Example: Test expects "sap.ui.define" in response
+if (response.includes("sap.ui.define")) {
+  // ✅ Pass
+} else {
+  // ❌ Fail - skill may not have been used properly
+}
+```
+
+**3. Token Estimation** - Since Claude Code CLI doesn't expose token counts, we estimate:
+
+```typescript
+const tokensUsed = Math.ceil((prompt.length + response.length) / 4);
+// Rough approximation: 1 token ≈ 4 characters
+```
+
+#### Test Configuration
+
+**Timeout**: Default 90 seconds per test (configurable via `TEST_TIMEOUT` env var)
+
+**Environment**: Tests set `CLAUDE_PLUGINS="ui5-guidelines"` to ensure only the target plugin is loaded
+
+**Stdin Handling**: Uses `spawn` with `stdio: ['ignore', 'pipe', 'pipe']` to prevent "waiting for stdin" timeouts
 
 ---
 
@@ -333,9 +394,53 @@ Avg Latency: 23.4s per test
 2. **Add proxy test case** in `test/fixtures/trigger-cases.json`
 3. **Run proxy tests** for quick feedback: `npm run test:triggering`
 4. **Add integration test** in `test/integration/fixtures/test-cases.ts`
-5. **Run integration tests** to verify: `npm run test:integration:claude` (free)
+5. **Run integration tests** to verify: `npm run test:integration:claude`
 6. **Iterate** based on results
-7. **Run full suite** before commit: `npm test && npm run test:integration`
+7. **Run full suite** before commit: `npm test && npm run test:integration:claude`
+
+#### Adding New Integration Test Cases
+
+1. Edit `test/integration/fixtures/test-cases.ts`:
+
+```typescript
+{
+  id: 21,
+  name: "new-test",
+  description: "Brief description",
+  prompt: "User prompt to test",
+  category: "module-loading",
+  expectedSkill: "ui5-best-practices",
+  expectedContent: "key phrase to verify"
+}
+```
+
+2. Rebuild and test:
+
+```bash
+npm run build
+npm run test:integration:claude
+```
+
+#### Updating Detection Patterns
+
+If skill detection is too strict/loose, edit `test/integration/providers/claude-code.ts`:
+
+```typescript
+private detectSkillUsage(response: string): string | null {
+  const ui5Patterns = [
+    'sap.ui.define',
+    'your-new-pattern',
+    // Add more patterns
+  ];
+
+  const matchCount = ui5Patterns.filter(pattern =>
+    response.toLowerCase().includes(pattern)
+  ).length;
+
+  // Adjust threshold (currently 2)
+  return matchCount >= UI5_PATTERN_MATCH_THRESHOLD ? 'ui5-best-practices' : null;
+}
+```
 
 ---
 
@@ -371,24 +476,9 @@ claude --version
 # Increase timeout if needed
 export TEST_TIMEOUT=120000
 
-# Check if stdin is causing hangs (should be 'ignore')
-# Integration tests use: stdio: ['ignore', 'pipe', 'pipe']
-
 # Run tests with verbose output
 npm run test:integration:claude -- --verbose
 ```
-
-### Skill Not Detected
-
-**Problem**: Tests fail with "Got: none" instead of "ui5-best-practices"
-
-**Cause**: Skill detection is heuristic - looks for 2+ UI5 patterns in response
-
-**Fix**:
-1. Check response preview in test output
-2. Verify UI5 content is actually present
-3. Adjust detection patterns in `test/integration/providers/claude-code.ts` if needed
-4. Update skill description to improve triggering
 
 ---
 
@@ -440,15 +530,6 @@ jobs:
           path: .metrics/
 ```
 
-### Cost Control
-
-Set cost budgets in CI:
-```bash
-# Fail if cost exceeds budget
-export MAX_COST_PER_RUN=0.50
-npm run test:integration
-```
-
 ---
 
 ## Limitations
@@ -480,13 +561,29 @@ npm run test:integration
 
 ---
 
+## Comparison with Other Test Levels
+
+| Aspect | Proxy Tests (Level 2) | Integration Tests (Level 3) |
+|--------|----------------------|----------------------------|
+| Speed | <1s (all tests) | ~5-10 min (all tests) |
+| Cost | Free | Free (Claude Code CLI) |
+| Real Claude | ❌ No (simulation) | ✅ Yes (actual API) |
+| Triggering accuracy | Simulated (~92%) | Real behavior |
+| Response quality | N/A | Content checks only |
+| CI/CD friendly | ✅ Yes | ⚠️ Slow, requires CLI |
+| Use case | Development feedback | Pre-release validation |
+
+---
+
 ## Related Documentation
 
-- **[PLAN.md](PLAN.md)** - Test framework implementation plan
 - **[README.md](README.md)** - Plugin overview and quick start
 - **[SKILL.md](skills/ui5-best-practices/SKILL.md)** - Skill content
 
 ---
+
+**Last Updated**: 2026-05-18
+**Test Branch**: `test/ui5-skills-testing`
 
 ## Support
 
