@@ -1,6 +1,6 @@
 /**
  * Base Provider Interface for Integration Tests
- * Supports multiple AI providers (Claude Code, Anthropic API, Cursor, etc.)
+ * Provides abstraction for AI provider implementations (currently Claude Code CLI)
  */
 
 import type { TestConfig, IntegrationTestResult, ProviderInfo } from '../types.js';

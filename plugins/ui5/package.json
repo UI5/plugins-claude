@@ -23,10 +23,7 @@
     "test:triggering": "ava dist/test/suites/triggering.test.js",
     "test:performance": "ava dist/test/suites/performance.test.js",
     "test:watch": "ava --watch",
-    "test:integration": "npm run test:integration:api && npm run test:integration:claude && npm run test:integration:cross",
-    "test:integration:api": "ava dist/test/integration/suites/anthropic-api.test.js",
     "test:integration:claude": "ava dist/test/integration/suites/claude-code.test.js",
-    "test:integration:cross": "ava dist/test/integration/suites/cross-provider.test.js",
     "metrics": "node dist/scripts/metrics.js",
     "metrics:week": "node dist/scripts/metrics.js --days 7",
     "metrics:month": "node dist/scripts/metrics.js --days 30",
@@ -42,7 +39,6 @@
     "zod": "^3.24.1"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
     "js-yaml": "^4.1.0"
   },
   "engines": {

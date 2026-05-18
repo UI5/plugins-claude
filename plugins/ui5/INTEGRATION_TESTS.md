@@ -408,8 +408,8 @@ jobs:
       - name: Install Claude Code CLI
         run: |
           # Install Claude Code CLI
-          # See: https://github.com/anthropics/claude-code
-          npm install -g @anthropic-ai/claude-code
+          # See: https://claude.ai/code
+          # Installation varies by platform - follow official docs
 
       - name: Install dependencies
         run: |

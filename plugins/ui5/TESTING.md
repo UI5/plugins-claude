@@ -96,8 +96,7 @@ npm run test:triggering     # Simulated keyword matching
 **What it tests**:
 - ✅ Real Claude skill triggering
 - ✅ Response quality and adherence to guidelines
-- ✅ Cross-provider consistency (Anthropic API vs Claude Code CLI)
-- ✅ Cost tracking and performance
+- ✅ Token usage and latency tracking
 
 **What it CANNOT test**:
 - ❌ User-specific contexts (competing plugins, custom settings)
@@ -116,28 +115,24 @@ npm run test:triggering     # Simulated keyword matching
 9. **Component Init** (1 case): ComponentSupport
 10. **Negative Cases** (3 cases): React, Vue, Python
 
-**Providers**:
-- **Anthropic API** (`claude-sonnet-4-6`): Direct API calls
-- **Claude Code CLI**: Real Claude Code environment
+**Provider**:
+- **Claude Code CLI**: Real Claude Code environment (free, local testing)
 
 **Run**:
 ```bash
-# Requires API key
-export ANTHROPIC_API_KEY="sk-ant-..."
-
-npm run test:integration           # All providers
-npm run test:integration:api       # Anthropic API only (~$0.15-0.35)
-npm run test:integration:claude    # Claude Code CLI only (free)
-npm run test:integration:cross     # Cross-provider consistency
+npm run test:integration:claude    # Claude Code CLI (~5-10 min, free)
 ```
 
 **Expected output**:
 ```
 ✅ Integration: 20/20 passing (100%)
-💰 Cost: $0.23 (468,241 tokens)
-⏱️  Duration: 156.3s
+⏱️  Duration: ~5-10 minutes
 
-Cross-provider consistency: 95%
+💰 Cost Summary:
+  Provider: claude-code
+  Tests run: 20
+  Total tokens (estimated): 24,567
+  Total cost: $0.0000
 ```
 
 ---
@@ -189,9 +184,8 @@ npm run build
 # Run all unit tests (free, fast)
 npm test
 
-# Run integration tests (requires API key, costs money)
-export ANTHROPIC_API_KEY="sk-ant-..."
-npm run test:integration
+# Run integration tests (requires Claude Code CLI, free)
+npm run test:integration:claude
 ```
 
 ### Available Scripts
@@ -205,10 +199,7 @@ npm run test:performance       # Context budget checks
 npm run test:watch             # Watch mode (development)
 
 # Integration Tests (Level 3)
-npm run test:integration              # All providers
-npm run test:integration:api          # Anthropic API only
-npm run test:integration:claude       # Claude Code CLI only
-npm run test:integration:cross        # Cross-provider consistency
+npm run test:integration:claude       # Claude Code CLI (free)
 
 # Build
 npm run build                  # Compile TypeScript
@@ -228,55 +219,49 @@ npm run metrics:optimize       # Optimization tips
 ### Prerequisites
 
 1. **Node.js >= 18.0.0**
-2. **Anthropic API key** (for API provider tests)
-3. **Claude Code CLI** (for CLI provider tests)
+2. **Claude Code CLI** (for integration tests)
+   - Install from: https://claude.ai/code
+   - Verify: `claude --version`
 
 ### Configuration
 
-Create `.env` file:
+Optional `.env` file:
 ```bash
-# Required for Anthropic API provider
-ANTHROPIC_API_KEY=sk-ant-...
-
 # Optional: Test configuration
-TEST_TIMEOUT=30000
+TEST_TIMEOUT=90000
 CLAUDE_CLI_PATH=/usr/local/bin/claude
 ```
 
-### Cost Estimates
+### Cost and Duration
 
-| Provider | Cost per Test | Total (20 tests) |
-|----------|---------------|------------------|
-| Anthropic API | ~$0.012 | ~$0.24 |
-| Claude Code CLI | $0 (free) | $0 |
+| Provider | Duration per Test | Total (20 tests) | Cost |
+|----------|-------------------|------------------|------|
+| Claude Code CLI | ~20-30s | ~5-10 min | $0 (free) |
 
-**Budget recommendations**:
-- Development: Run CLI tests (free)
+**Workflow recommendations**:
+- Development: Run CLI tests (free, ~5-10 min)
 - Pre-commit: Run structure + triggering (~5s)
-- Pre-release: Run full integration suite (~$0.25)
-- CI/CD: Daily integration run (~$0.25/day)
+- Pre-release: Run full integration suite (free, ~10 min)
+- CI/CD: Daily integration run (free)
 
 ---
 
-## Cost Tracking
+## Token Tracking
 
-Integration tests track costs automatically:
+Integration tests track token usage automatically:
 
 ```bash
-npm run test:integration
+npm run test:integration:claude
 
 # Output includes:
 💰 Cost Summary:
-  Provider: anthropic-api
-  Total Cost: $0.23
-  Tokens Used: 468,241
-  Duration: 156.3s
-  
-  Per Test: $0.012 avg
-  Cost/1M tokens: $0.49
+  Provider: claude-code
+  Tests run: 20
+  Total tokens (estimated): 24,567
+  Total cost: $0.0000
 ```
 
-Cost data is saved to `.metrics/cost-history.json` for analysis.
+Token estimates are approximate (1 token ≈ 4 characters) since Claude Code CLI doesn't expose exact token counts.
 
 ---
 
@@ -299,11 +284,9 @@ npm run metrics:optimize
 ### Metrics Tracked
 
 - ✅ Test pass/fail rates
-- ✅ Token usage (input/output/cache hits)
-- ✅ Cost per test
+- ✅ Token usage (estimated)
 - ✅ Duration per test
-- ✅ Cross-provider consistency
-- ✅ Skill triggering accuracy
+- ✅ Skill triggering accuracy (heuristic detection)
 
 ### Example Output
 
@@ -312,20 +295,15 @@ npm run metrics:optimize
 
 Tests Run: 140
 Pass Rate: 98.6% (138/140)
-Avg Duration: 7.8s per test
-
-💰 Cost Analysis:
-Total Cost: $1.68
-Avg Cost/Test: $0.012
-Token Efficiency: 0.49 $/1M tokens
+Avg Duration: ~25s per test
 
 🎯 Triggering Accuracy:
-Proxy Tests: 97.8% (simulation)
-Integration Tests: 94.2% (real API)
+Proxy Tests: 92.0% (simulation)
+Integration Tests: Detected via UI5 pattern matching
 
 ⚡ Performance:
-Cache Hit Rate: 67%
-P95 Latency: 12.3s
+Total Duration: ~70 minutes
+Avg Latency: 23.4s per test
 ```
 
 ---
@@ -380,42 +358,37 @@ P95 Latency: 12.3s
 **Problem**: Integration tests fail or timeout
 
 **Causes**:
-- Missing API key
+- Claude Code CLI not installed
 - Network issues
-- API rate limits
-- Claude model changes
+- Tests timing out (default 90s)
+- Stdin waiting issue
 
 **Fix**:
 ```bash
-# Check API key
-echo $ANTHROPIC_API_KEY
-
-# Increase timeout
-export TEST_TIMEOUT=60000
-
-# Run single test for debugging
-npm run test:integration:api -- --match="async-module-loading"
-
-# Check Claude CLI version
+# Check Claude CLI installation
 claude --version
+
+# Increase timeout if needed
+export TEST_TIMEOUT=120000
+
+# Check if stdin is causing hangs (should be 'ignore')
+# Integration tests use: stdio: ['ignore', 'pipe', 'pipe']
+
+# Run tests with verbose output
+npm run test:integration:claude -- --verbose
 ```
 
-### Cross-Provider Inconsistency
+### Skill Not Detected
 
-**Problem**: Different responses between Anthropic API and Claude Code CLI
+**Problem**: Tests fail with "Got: none" instead of "ui5-best-practices"
 
-**Expected**: Some variance is normal (different contexts, prompts)
-
-**Investigate if**:
-- Consistency < 80%
-- Same test case fails on one provider consistently
-- Responses contradict skill guidelines
+**Cause**: Skill detection is heuristic - looks for 2+ UI5 patterns in response
 
 **Fix**:
-1. Review both outputs manually
-2. Check if skill description is ambiguous
-3. Update skill content or test expectations
-4. Consider provider-specific behavior is acceptable
+1. Check response preview in test output
+2. Verify UI5 content is actually present
+3. Adjust detection patterns in `test/integration/providers/claude-code.ts` if needed
+4. Update skill description to improve triggering
 
 ---
 
@@ -504,7 +477,6 @@ npm run test:integration
 - ✅ Current model behavior with test prompts
 - ✅ Skill activation for known patterns
 - ✅ Response quality for specific scenarios
-- ✅ Cross-provider consistency
 
 ---
 
