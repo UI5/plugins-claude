@@ -508,8 +508,3 @@ For additional information, consult these UI5 documentation pages:
 - Official UI5 API Reference (use `get_api_reference` tool)
 
 ---
-
-**Version**: 3.0.0  
-**Based on**: Official UI5 Development Guidelines  
-**Source**: /Users/i326076/SAPDevelop/mcp-server/resources/guidelines.md  
-**Last Updated**: 2026-05-15
