@@ -12,12 +12,14 @@ import { testCases } from "../fixtures/test-cases.js";
 import { CostTracker } from "../utils/cost-tracker.js";
 import { assertContentIncludes } from "../utils/assertions.js";
 import { OutputCapture } from "../utils/output-capture.js";
+import { TestReporter } from "../utils/test-reporter.js";
 
 // Test context type
 interface TestContext {
   provider: ClaudeCodeProvider;
   costTracker: CostTracker;
   outputCapture: OutputCapture;
+  reporter: TestReporter;
   claudeAvailable: boolean;
   pluginInstalled: boolean;
 }
@@ -30,11 +32,18 @@ test.before(async (t) => {
   const pluginPath = join(homedir(), '.claude', 'plugins', 'ui5-guidelines');
   const pluginInstalled = existsSync(pluginPath);
 
+  // Initialize reporter
+  const reporter = new TestReporter();
+  if (claudeAvailable && pluginInstalled) {
+    reporter.start();
+  }
+
   // Store in test context
   t.context = {
     provider,
     costTracker: new CostTracker(),
     outputCapture: new OutputCapture(),
+    reporter,
     claudeAvailable,
     pluginInstalled
   } as TestContext;
@@ -55,12 +64,29 @@ test.before(async (t) => {
   }
 });
 
-// After all tests, print summary
-test.after.always((t) => {
-  const { claudeAvailable, costTracker } = t.context as TestContext;
-  if (!claudeAvailable) return;
+// After all tests, print summary and generate reports
+test.after.always(async (t) => {
+  const { claudeAvailable, pluginInstalled, costTracker, reporter, provider } = t.context as TestContext;
+  if (!claudeAvailable || !pluginInstalled) return;
 
   console.log(costTracker.report());
+
+  // Generate reports
+  try {
+    const summary = reporter.generateSummary(provider.name);
+    const categoryMetrics = reporter.getCategoryMetrics();
+
+    // Save JSON report
+    const jsonPath = await reporter.saveJSON(summary);
+    console.log(`\n📊 JSON report saved to: ${jsonPath}`);
+
+    // Save HTML dashboard
+    const htmlPath = await reporter.saveHTML(summary, categoryMetrics);
+    console.log(`📈 HTML dashboard saved to: ${htmlPath}`);
+    console.log(`   Open in browser: file://${htmlPath}\n`);
+  } catch (error) {
+    console.error('⚠️  Failed to generate reports:', error);
+  }
 });
 
 // Run each test case
@@ -68,7 +94,7 @@ for (const testCase of testCases) {
   test.serial(
     `[Claude Code] ${testCase.name}: ${testCase.description}`,
     async (t) => {
-      const { provider, costTracker, outputCapture, claudeAvailable, pluginInstalled } = t.context as TestContext;
+      const { provider, costTracker, outputCapture, reporter, claudeAvailable, pluginInstalled } = t.context as TestContext;
 
       // Skip if Claude not available or plugin not installed
       if (!claudeAvailable || !pluginInstalled) {
@@ -76,11 +102,15 @@ for (const testCase of testCases) {
         return;
       }
 
+      const testStartTime = Date.now();
+
       // Run the test
       const result = await provider.runTest(testCase.prompt, {
         timeout: 120000, // 120s timeout (increased from 90s)
         maxRetries: 2,   // Retry up to 2 times for timeouts/rate limits
       });
+
+      const testDuration = Date.now() - testStartTime;
 
       // Track metrics
       costTracker.track({
@@ -90,6 +120,16 @@ for (const testCase of testCases) {
         tokensUsed: result.tokensUsed,
         cost: result.cost,
         timestamp: new Date(),
+      });
+
+      // Add to reporter (estimate retry count from duration vs latency)
+      const estimatedRetries = Math.max(0, Math.floor((testDuration - result.latencyMs) / 5000));
+      reporter.addResult({
+        testCase,
+        result,
+        duration: testDuration,
+        retryCount: estimatedRetries,
+        timestamp: new Date().toISOString(),
       });
 
       // Log test result
