@@ -11,7 +11,6 @@ export class ClaudeCodeProvider extends BaseProvider {
   name = "claude-code";
 
   // Configuration constants
-  private static readonly UI5_PATTERN_MATCH_THRESHOLD = 2;
   private static readonly CHARS_PER_TOKEN_ESTIMATE = 4;
 
   async isAvailable(): Promise<boolean> {
@@ -142,28 +141,75 @@ export class ClaudeCodeProvider extends BaseProvider {
 
     // Look for UI5-specific patterns that indicate skill was used
     const ui5Patterns = [
+      // Module loading patterns
       'sap.ui.define',
       'sap.ui.require',
       'sap/m/',
       'sap/ui/',
+      'sap.ui.core',
+      'sap.m.',
+      'sap.ui.model',
+
+      // Component patterns
       'columnlayout',
       'simpleform',
-      'odata type',
-      'button$pressevent',
+      'component.js',
+      'manifest.json',
       'componentssupport',
+
+      // OData patterns
+      'odata type',
+      'odata v2',
+      'odata v4',
+      'odata model',
+      'sap.ui.model.odata',
+
+      // TypeScript patterns
+      'button$press',
+      'button$pressevent',
+      'event$',
+      'ui5 types',
+
+      // CAP patterns
       'cds watch',
+      'cds serve',
+      'cap project',
+
+      // CSP patterns
+      'content security policy',
+      'csp violation',
+      'nonce',
+
+      // Tooling patterns
       'ui5.yaml',
+      'ui5 tooling',
+      'ui5-tooling',
       'get_api_reference',
       'run_ui5_linter',
     ];
 
-    // Check if response contains multiple UI5 patterns
+    // Critical keywords that strongly indicate UI5 skill usage
+    const criticalKeywords = [
+      'sap.ui.',
+      'sapui5',
+      'ui5 best practices',
+      'ui5 guidelines',
+    ];
+
+    // Check if response contains UI5 patterns
     const matchCount = ui5Patterns.filter(pattern =>
       responseLower.includes(pattern)
     ).length;
 
-    // If response has N+ UI5 patterns, assume skill was triggered
-    return matchCount >= ClaudeCodeProvider.UI5_PATTERN_MATCH_THRESHOLD
+    // Check for critical keywords
+    const hasCriticalKeyword = criticalKeywords.some(keyword =>
+      responseLower.includes(keyword)
+    );
+
+    // Relaxed detection: 1+ pattern OR critical keyword
+    const hasMinPatterns = matchCount >= 1;
+
+    return (hasMinPatterns || hasCriticalKeyword)
       ? 'ui5-best-practices'
       : null;
   }

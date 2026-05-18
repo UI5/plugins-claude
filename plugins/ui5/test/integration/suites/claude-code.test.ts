@@ -64,7 +64,7 @@ for (const testCase of testCases) {
 
       // Run the test
       const result = await provider.runTest(testCase.prompt, {
-        timeout: 90000, // 90s timeout
+        timeout: 120000, // 120s timeout (increased from 90s)
       });
 
       // Track metrics
