@@ -58,6 +58,8 @@ export class ClaudeCodeProvider extends BaseProvider {
           ...process.env,
           // Enable only ui5-guidelines plugin for testing
           CLAUDE_PLUGINS: "ui5-guidelines",
+          // Disable extended thinking (not supported in all contexts)
+          MAX_THINKING_TOKENS: "0",
         },
         stdio: ['ignore', 'pipe', 'pipe'], // Ignore stdin, capture stdout/stderr
       });

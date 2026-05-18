@@ -4,6 +4,9 @@
  */
 
 import test from "ava";
+import { existsSync } from "fs";
+import { homedir } from "os";
+import { join } from "path";
 import { ClaudeCodeProvider } from "../providers/claude-code.js";
 import { testCases } from "../fixtures/test-cases.js";
 import { CostTracker } from "../utils/cost-tracker.js";
@@ -11,15 +14,29 @@ import { assertContentIncludes } from "../utils/assertions.js";
 
 // Check if Claude Code CLI is available
 let claudeAvailable = false;
+let pluginInstalled = false;
 
-test.before(async (t) => {
+test.before(async () => {
   const provider = new ClaudeCodeProvider();
   claudeAvailable = await provider.isAvailable();
+
+  // Check if plugin is installed
+  const pluginPath = join(homedir(), '.claude', 'plugins', 'ui5-guidelines');
+  pluginInstalled = existsSync(pluginPath);
 
   if (!claudeAvailable) {
     console.warn("\n⚠️  Claude Code CLI not available");
     console.warn("   Install from: https://claude.ai/code");
     console.warn("   Skipping all Claude Code integration tests\n");
+  } else if (!pluginInstalled) {
+    console.warn("\n⚠️  ui5-guidelines plugin not installed");
+    console.warn(`   Expected at: ${pluginPath}`);
+    console.warn("   Run: ln -s $(pwd) ~/.claude/plugins/ui5-guidelines");
+    console.warn("   Skipping all Claude Code integration tests\n");
+  } else {
+    console.log("\n✅ Claude Code CLI available");
+    console.log(`✅ Plugin installed at: ${pluginPath}`);
+    console.log("🚀 Running integration tests...\n");
   }
 });
 
@@ -39,9 +56,9 @@ for (const testCase of testCases) {
   test.serial(
     `[Claude Code] ${testCase.name}: ${testCase.description}`,
     async (t) => {
-      // Skip if Claude not available
-      if (!claudeAvailable) {
-        t.pass("Skipped - Claude Code CLI not available");
+      // Skip if Claude not available or plugin not installed
+      if (!claudeAvailable || !pluginInstalled) {
+        t.pass("Skipped - Claude Code CLI or plugin not available");
         return;
       }
 
@@ -111,8 +128,8 @@ for (const testCase of testCases) {
 
 // Summary test
 test.serial("[Claude Code] Test Summary", (t) => {
-  if (!claudeAvailable) {
-    t.pass("Skipped - Claude Code CLI not available");
+  if (!claudeAvailable || !pluginInstalled) {
+    t.pass("Skipped - Claude Code CLI or plugin not available");
     return;
   }
 
