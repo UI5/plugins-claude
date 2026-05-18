@@ -216,6 +216,3 @@ export const testCasesByCategory = {
   "component-init": testCases.filter(tc => tc.category === "component-init"),
   "negative": testCases.filter(tc => tc.category === "negative")
 };
-
-export const testCaseCount = testCases.length;
-export const categoriesCount = Object.keys(testCasesByCategory).length;

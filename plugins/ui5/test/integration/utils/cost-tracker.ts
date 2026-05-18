@@ -12,10 +12,7 @@ export class CostTracker {
    * Track a test execution
    */
   track(entry: CostEntry): void {
-    this.entries.push({
-      ...entry,
-      timestamp: new Date(),
-    });
+    this.entries.push(entry);
   }
 
   /**
@@ -53,9 +50,10 @@ export class CostTracker {
     lines.push('\n💰 Cost Summary:');
 
     for (const provider of providers) {
-      const tokens = this.getTotalTokens(provider);
-      const cost = this.getTotalCost(provider);
-      const count = this.entries.filter(e => e.provider === provider).length;
+      const providerEntries = this.entries.filter(e => e.provider === provider);
+      const tokens = providerEntries.reduce((sum, e) => sum + e.tokensUsed, 0);
+      const cost = providerEntries.reduce((sum, e) => sum + e.cost, 0);
+      const count = providerEntries.length;
 
       lines.push(`\n  Provider: ${provider}`);
       lines.push(`  Tests run: ${count}`);
@@ -74,13 +72,23 @@ export class CostTracker {
    * Export data as JSON string
    */
   exportJSON(): string {
+    const providerStats = new Map<string, { tests: number; tokens: number; cost: number }>();
+
+    for (const entry of this.entries) {
+      const stats = providerStats.get(entry.provider) || { tests: 0, tokens: 0, cost: 0 };
+      stats.tests += 1;
+      stats.tokens += entry.tokensUsed;
+      stats.cost += entry.cost;
+      providerStats.set(entry.provider, stats);
+    }
+
     const summary = {
       totalEntries: this.entries.length,
-      providers: [...new Set(this.entries.map(e => e.provider))].map(provider => ({
-        name: provider,
-        tests: this.entries.filter(e => e.provider === provider).length,
-        totalTokens: this.getTotalTokens(provider),
-        totalCost: this.getTotalCost(provider),
+      providers: Array.from(providerStats.entries()).map(([name, stats]) => ({
+        name,
+        tests: stats.tests,
+        totalTokens: stats.tokens,
+        totalCost: stats.cost,
       })),
       entries: this.entries,
     };

@@ -7,6 +7,7 @@ import test from "ava";
 import { ClaudeCodeProvider } from "../providers/claude-code.js";
 import { testCases } from "../fixtures/test-cases.js";
 import { CostTracker } from "../utils/cost-tracker.js";
+import { assertContentIncludes } from "../utils/assertions.js";
 
 // Check if Claude Code CLI is available
 let claudeAvailable = false;
@@ -56,6 +57,7 @@ for (const testCase of testCases) {
         prompt: testCase.prompt,
         tokensUsed: result.tokensUsed,
         cost: result.cost,
+        timestamp: new Date(),
       });
 
       // Log test result
@@ -96,17 +98,11 @@ for (const testCase of testCases) {
 
       // Assert: Expected content (if specified)
       if (testCase.expectedContent && result.skillTriggered !== null) {
-        const responseText = result.responseContent.toLowerCase();
-        const expectedText = testCase.expectedContent.toLowerCase();
-
-        if (!responseText.includes(expectedText)) {
-          t.log(`⚠️  Expected content not found: "${testCase.expectedContent}"`);
-          t.log(`Response preview: ${result.responseContent.substring(0, 300)}...`);
-        }
-
-        t.true(
-          responseText.includes(expectedText),
-          `Response should contain "${testCase.expectedContent}"`
+        assertContentIncludes(
+          t,
+          result.responseContent,
+          testCase.expectedContent,
+          testCase.name
         );
       }
     }

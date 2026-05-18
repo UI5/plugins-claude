@@ -127,10 +127,13 @@ test('plugin directory structure is clean', (t) => {
   // Allowed additional files
   const allowed = [
     '.DS_Store',
+    'ava.config.js',
+    'tsconfig.json',
     'node_modules',
     'dist',
     'TEST_REFACTOR_SUMMARY.md',
     'PLAN.md',
+    'INTEGRATION_TESTS.md',
     '.env',
     '.env.example',
     'package-lock.json'

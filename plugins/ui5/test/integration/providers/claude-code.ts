@@ -10,6 +10,10 @@ import type { TestConfig, IntegrationTestResult } from '../types.js';
 export class ClaudeCodeProvider extends BaseProvider {
   name = "claude-code";
 
+  // Configuration constants
+  private static readonly UI5_PATTERN_MATCH_THRESHOLD = 2;
+  private static readonly CHARS_PER_TOKEN_ESTIMATE = 4;
+
   async isAvailable(): Promise<boolean> {
     return new Promise((resolve) => {
       const child = spawn("claude", ["--version"], {
@@ -31,6 +35,19 @@ export class ClaudeCodeProvider extends BaseProvider {
     const startTime = Date.now();
 
     return new Promise((resolve) => {
+      // Prevent multiple resolve() calls
+      let resolved = false;
+      const safeResolve = (result: IntegrationTestResult) => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timer);
+          resolve(result);
+        }
+      };
+
+      // Helper to calculate latency
+      const getLatency = () => Date.now() - startTime;
+
       let stdout = '';
       let stderr = '';
 
@@ -57,28 +74,26 @@ export class ClaudeCodeProvider extends BaseProvider {
 
       // Handle completion
       child.on('close', (code) => {
-        const latencyMs = Date.now() - startTime;
-
         if (code === 0) {
           // Success
           const skillTriggered = this.detectSkillUsage(stdout);
           const tokensUsed = this.estimateTokens(prompt, stdout);
 
-          resolve({
+          safeResolve({
             skillTriggered,
             responseContent: stdout,
             tokensUsed,
-            latencyMs,
+            latencyMs: getLatency(),
             cost: 0,
             success: true,
           });
         } else {
           // Error
-          resolve({
+          safeResolve({
             skillTriggered: null,
             responseContent: stdout,
             tokensUsed: 0,
-            latencyMs,
+            latencyMs: getLatency(),
             cost: 0,
             success: false,
             error: `Command failed with code ${code}: ${stderr}`,
@@ -88,12 +103,11 @@ export class ClaudeCodeProvider extends BaseProvider {
 
       // Handle errors
       child.on('error', (error) => {
-        const latencyMs = Date.now() - startTime;
-        resolve({
+        safeResolve({
           skillTriggered: null,
           responseContent: '',
           tokensUsed: 0,
-          latencyMs,
+          latencyMs: getLatency(),
           cost: 0,
           success: false,
           error: error.message,
@@ -104,19 +118,16 @@ export class ClaudeCodeProvider extends BaseProvider {
       const timeoutMs = config.timeout || 60000;
       const timer = setTimeout(() => {
         child.kill();
-        const latencyMs = Date.now() - startTime;
-        resolve({
+        safeResolve({
           skillTriggered: null,
           responseContent: stdout,
           tokensUsed: 0,
-          latencyMs,
+          latencyMs: getLatency(),
           cost: 0,
           success: false,
           error: `Timeout after ${timeoutMs}ms`,
         });
       }, timeoutMs);
-
-      child.on('close', () => clearTimeout(timer));
     });
   }
 
@@ -149,8 +160,10 @@ export class ClaudeCodeProvider extends BaseProvider {
       responseLower.includes(pattern)
     ).length;
 
-    // If response has 2+ UI5 patterns, assume skill was triggered
-    return matchCount >= 2 ? 'ui5-best-practices' : null;
+    // If response has N+ UI5 patterns, assume skill was triggered
+    return matchCount >= ClaudeCodeProvider.UI5_PATTERN_MATCH_THRESHOLD
+      ? 'ui5-best-practices'
+      : null;
   }
 
   /**
@@ -159,7 +172,7 @@ export class ClaudeCodeProvider extends BaseProvider {
    */
   private estimateTokens(prompt: string, response: string): number {
     const totalChars = prompt.length + response.length;
-    return Math.ceil(totalChars / 4);
+    return Math.ceil(totalChars / ClaudeCodeProvider.CHARS_PER_TOKEN_ESTIMATE);
   }
 
   getInfo() {

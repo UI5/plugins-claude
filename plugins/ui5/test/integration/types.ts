@@ -40,5 +40,5 @@ export interface CostEntry {
   prompt: string;
   tokensUsed: number;
   cost: number;
-  timestamp?: Date;
+  timestamp: Date;
 }
