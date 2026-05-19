@@ -28,9 +28,30 @@ test.before(async (t) => {
   const provider = new ClaudeCodeProvider();
   const claudeAvailable = await provider.isAvailable();
 
-  // Check if plugin is installed
+  // Auto-install plugin if not present
   const pluginPath = join(homedir(), '.claude', 'plugins', 'ui5');
-  const pluginInstalled = existsSync(pluginPath);
+  let pluginInstalled = existsSync(pluginPath);
+
+  if (!pluginInstalled && claudeAvailable) {
+    try {
+      const { execSync } = await import('child_process');
+      const currentDir = process.cwd();
+      const targetPath = join(currentDir);
+
+      // Create plugins directory if it doesn't exist
+      execSync(`mkdir -p ${join(homedir(), '.claude', 'plugins')}`, { stdio: 'ignore' });
+
+      // Create symlink
+      execSync(`ln -sf "${targetPath}" "${pluginPath}"`, { stdio: 'ignore' });
+
+      pluginInstalled = existsSync(pluginPath);
+      if (pluginInstalled) {
+        console.log(`\n✅ Plugin auto-installed at: ${pluginPath}`);
+      }
+    } catch (error) {
+      console.warn(`\n⚠️  Failed to auto-install plugin: ${error}`);
+    }
+  }
 
   // Initialize reporter
   const reporter = new TestReporter();
@@ -53,13 +74,12 @@ test.before(async (t) => {
     console.warn("   Install from: https://claude.ai/code");
     console.warn("   Skipping all Claude Code integration tests\n");
   } else if (!pluginInstalled) {
-    console.warn("\n⚠️  ui5 plugin not installed");
+    console.warn("\n⚠️  ui5 plugin could not be installed");
     console.warn(`   Expected at: ${pluginPath}`);
-    console.warn("   Run: ln -s $(pwd) ~/.claude/plugins/ui5");
     console.warn("   Skipping all Claude Code integration tests\n");
   } else {
     console.log("\n✅ Claude Code CLI available");
-    console.log(`✅ Plugin installed at: ${pluginPath}`);
+    console.log(`✅ Plugin ready at: ${pluginPath}`);
     console.log("🚀 Running integration tests...\n");
   }
 });
@@ -98,7 +118,8 @@ for (const testCase of testCases) {
 
       // Skip if Claude not available or plugin not installed
       if (!claudeAvailable || !pluginInstalled) {
-        t.pass("Skipped - Claude Code CLI or plugin not available");
+        t.log("⊘ Skipped - Claude Code CLI or plugin not available");
+        t.pass(); // Mark as passed but skipped
         return;
       }
 
@@ -209,7 +230,8 @@ test.serial("[Claude Code] Test Summary", (t) => {
   const { provider, costTracker, claudeAvailable, pluginInstalled } = t.context as TestContext;
 
   if (!claudeAvailable || !pluginInstalled) {
-    t.pass("Skipped - Claude Code CLI or plugin not available");
+    t.log("⊘ Skipped - Claude Code CLI or plugin not available");
+    t.pass(); // Mark as passed but skipped
     return;
   }
 
