@@ -1,14 +1,14 @@
-# Testing Documentation - UI5 Guidelines Plugin
+# Testing Documentation - UI5 Plugin
 
 ## Overview
 
-The UI5 Guidelines plugin has a **three-level testing approach** to ensure quality at different stages of development.
+The UI5 plugin has a **three-level testing approach** to ensure quality at different stages of development.
 
 ### Current Scope
 
 - **Skills Tested**: `ui5-best-practices` (single skill)
-- **Test Cases**: 25 triggering tests, 20 integration tests
-- **Coverage Areas**: Module loading, data binding, CSP security, forms, TypeScript events, CAP integration, MCP tooling, i18n, component initialization
+- **Test Cases**: 32 triggering tests, 27 integration tests
+- **Coverage Areas**: Module loading, data binding, CSP security, forms, TypeScript events, CAP integration, MCP tooling, i18n, component initialization, testing
 
 ---
 
@@ -19,7 +19,7 @@ The UI5 Guidelines plugin has a **three-level testing approach** to ensure quali
 **Purpose**: Fast, deterministic validation of plugin configuration and file structure.
 
 **What it tests**:
-- ✅ Plugin metadata validation ([plugin.json](plugins/ui5/.claude-plugin/plugin.json))
+- ✅ Plugin metadata validation ([plugin.json](.claude-plugin/plugin.json))
 - ✅ Skill file existence and structure
 - ✅ YAML frontmatter validity
 - ✅ Skill token budget (warning at 700 lines, current: ~510 lines)
@@ -38,8 +38,8 @@ npm run test:performance    # Context budget checks
 
 **Expected output**:
 ```
-✅ Structure: 15/15 passing (100%)
-✅ Performance: 8/8 passing (100%)
+✅ Structure: 14/14 passing (100%)
+✅ Performance: 7/8 passing (100%)
 ```
 
 ---
@@ -74,7 +74,8 @@ npm run test:triggering     # Simulated keyword matching
 
 **Expected output**:
 ```
-⚠️  Triggering: 25/25 passing (100% - simulation only)
+⚠️  Triggering: 27/32 passing (84.4% - simulation only)
+Note: Lower accuracy is expected as edge cases are added
 ```
 
 **Use proxy tests for**:
@@ -104,23 +105,24 @@ npm run test:triggering     # Simulated keyword matching
 - ❌ **User-specific contexts** - Tests run in isolation without conversation history
 - ❌ **All possible phrasings** - Limited test case coverage
 
-**Test Categories** (20 test cases):
+**Test Categories** (27 test cases):
 1. **Module Loading** (2 cases): `sap.ui.define`, `core:require`
 2. **Data Binding** (2 cases): OData types priority, custom types
-3. **CSP Security** (1 case): Inline violations
+3. **CSP Security** (2 cases): Inline violations, script-src directive
 4. **Form Creation** (2 cases): Layout choice, column defaults
-5. **TypeScript Events** (2 cases): Modern (>= 1.115.0), legacy
+5. **TypeScript Events** (3 cases): Modern (>= 1.115.0), legacy, model property access
 6. **CAP Integration** (3 cases): Server command, location, no proxy
 7. **MCP Tooling** (2 cases): API reference, linter
 8. **i18n** (2 cases): S/4HANA workflow, base file
 9. **Component Init** (1 case): ComponentSupport
-10. **Negative Cases** (3 cases): React, Vue, Python
+10. **Testing** (3 cases): Test Starter Istanbul, OPA5 TypeScript, Chart debugging
+11. **Advanced Patterns** (2 cases): ts-interface-generator, Integration Cards data path
+12. **Negative Cases** (5 cases): React, Vue, Python, Angular, .NET
 
 **Provider**: Claude Code CLI (free, local testing)
 
 **Run**:
 ```bash
-cd plugins/ui5
 npm run test:integration:claude
 ```
 
@@ -134,11 +136,11 @@ npm run test:integration:claude
 
 💰 Cost Summary:
   Provider: claude-code
-  Tests run: 20
-  Total tokens (estimated): 24,567
+  Tests run: 27
+  Total tokens (estimated): 33,000+
   Total cost: $0.0000
 
-20 tests passed
+27 tests passed
 ```
 
 **If Claude Code CLI not installed**:
@@ -147,10 +149,10 @@ npm run test:integration:claude
    Install from: https://claude.ai/code
    Skipping all Claude Code integration tests
 
-20 tests passed (all skipped)
+27 tests passed (all skipped)
 ```
 
-**Duration**: ~5-10 minutes for full suite (20 tests × ~20-30s per test)
+**Duration**: ~10-15 minutes for full suite (27 tests × ~20-30s per test)
 
 #### How Integration Tests Work
 
@@ -213,8 +215,10 @@ const tokensUsed = Math.ceil((prompt.length + response.length) / 4);
 | MCP Tooling | 2 | 2 |
 | i18n | 2 | 2 |
 | Component Init | 2 | 1 |
-| Negative Cases | 5 | 3 |
-| **Total** | **25** | **20** |
+| Testing | 3 | 3 |
+| Advanced Patterns | 2 | 2 |
+| Negative Cases | 5 | 5 |
+| **Total** | **32** | **27** |
 
 ### Coverage by SKILL.md Section
 
@@ -238,7 +242,6 @@ const tokensUsed = Math.ceil((prompt.length + response.length) / 4);
 ### Quick Start
 
 ```bash
-cd plugins/ui5
 npm install
 npm run build
 
@@ -295,9 +298,9 @@ CLAUDE_CLI_PATH=/usr/local/bin/claude
 
 ### Cost and Duration
 
-| Provider | Duration per Test | Total (20 tests) | Cost |
+| Provider | Duration per Test | Total (27 tests) | Cost |
 |----------|-------------------|------------------|------|
-| Claude Code CLI | ~20-30s | ~5-10 min | $0 (free) |
+| Claude Code CLI | ~20-30s | ~10-15 min | $0 (free) |
 
 **Workflow recommendations**:
 - Development: Run CLI tests (free, ~5-10 min)
@@ -317,8 +320,8 @@ npm run test:integration:claude
 # Output includes:
 💰 Cost Summary:
   Provider: claude-code
-  Tests run: 20
-  Total tokens (estimated): 24,567
+  Tests run: 27
+  Total tokens (estimated): 33,000+
   Total cost: $0.0000
 ```
 
@@ -352,19 +355,19 @@ npm run metrics:optimize
 ### Example Output
 
 ```
-📊 UI5 Guidelines Plugin Metrics (Last 7 Days)
+📊 UI5 Plugin Metrics (Last 7 Days)
 
-Tests Run: 140
-Pass Rate: 98.6% (138/140)
+Tests Run: 189
+Pass Rate: 98.4% (186/189)
 Avg Duration: ~25s per test
 
 🎯 Triggering Accuracy:
-Proxy Tests: 92.0% (simulation)
+Proxy Tests: 84.4% (simulation - includes edge cases)
 Integration Tests: Detected via UI5 pattern matching
 
 ⚡ Performance:
-Total Duration: ~70 minutes
-Avg Latency: 23.4s per test
+Total Duration: ~95 minutes
+Avg Latency: 24.1s per test
 ```
 
 ---
@@ -582,8 +585,9 @@ jobs:
 
 ---
 
-**Last Updated**: 2026-05-18
-**Test Branch**: `test/ui5-skills-testing`
+**Last Updated**: 2026-05-19
+**Branch**: `test/ui5-skills-testing`
+**Plugin Path**: `plugins/ui5/` (migrated from `ui5-guidelines`)
 
 ## Support
 
