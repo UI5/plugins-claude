@@ -36,8 +36,8 @@ This reference shows a complete pairing of a `manifest.json` and the correspondi
         "dateContext": {
           "value": "2020-09-02"
         },
-        "Customers": {
-          "value": ["ALFKI"]
+        "Customer": {
+          "value": "ALFKI"
         },
         "northwindDestination": {
           "value": "northwind"
@@ -202,8 +202,8 @@ sap.ui.define(["sap/ui/integration/Designtime"], function (Designtime) {
 						label: "Customer Filter"
 					},
 
-					CustomerID: {
-						manifestpath: "/sap.card/configuration/parameters/CustomerID/value",
+					Customer: {
+						manifestpath: "/sap.card/configuration/parameters/Customer/value",
 						type: "string",
 						label: "Customer ID",
 						values: {
