@@ -10,9 +10,16 @@ import { join } from "path";
 import { ClaudeCodeProvider } from "../providers/claude-code.js";
 import { testCases } from "../fixtures/test-cases.js";
 import { CostTracker } from "../utils/cost-tracker.js";
-import { assertContentIncludes } from "../utils/assertions.js";
 import { OutputCapture } from "../utils/output-capture.js";
 import { TestReporter } from "../utils/test-reporter.js";
+import {
+  shouldSkipTest,
+  executeTestWithMetrics,
+  handleTestFailure,
+  assertSkillTriggering,
+  assertExpectedContent,
+} from "../utils/test-helpers.js";
+import { TestLogger } from "../utils/test-logger.js";
 
 // Test context type
 interface TestContext {
@@ -46,10 +53,10 @@ test.before(async (t) => {
 
       pluginInstalled = existsSync(pluginPath);
       if (pluginInstalled) {
-        console.log(`\n✅ Plugin auto-installed at: ${pluginPath}`);
+        TestLogger.success(`\nPlugin auto-installed at: ${pluginPath}`);
       }
     } catch (error) {
-      console.warn(`\n⚠️  Failed to auto-install plugin: ${error}`);
+      TestLogger.warning(`\nFailed to auto-install plugin: ${error}`);
     }
   }
 
@@ -70,17 +77,17 @@ test.before(async (t) => {
   } as TestContext;
 
   if (!claudeAvailable) {
-    console.warn("\n⚠️  Claude Code CLI not available");
-    console.warn("   Install from: https://claude.ai/code");
-    console.warn("   Skipping all Claude Code integration tests\n");
+    TestLogger.warning("\nClaude Code CLI not available");
+    TestLogger.plain("Install from: https://claude.ai/code");
+    TestLogger.plain("Skipping all Claude Code integration tests\n");
   } else if (!pluginInstalled) {
-    console.warn("\n⚠️  ui5 plugin could not be installed");
-    console.warn(`   Expected at: ${pluginPath}`);
-    console.warn("   Skipping all Claude Code integration tests\n");
+    TestLogger.warning("\nui5 plugin could not be installed");
+    TestLogger.plain(`Expected at: ${pluginPath}`);
+    TestLogger.plain("Skipping all Claude Code integration tests\n");
   } else {
-    console.log("\n✅ Claude Code CLI available");
-    console.log(`✅ Plugin ready at: ${pluginPath}`);
-    console.log("🚀 Running integration tests...\n");
+    TestLogger.success("\nClaude Code CLI available");
+    TestLogger.success(`Plugin ready at: ${pluginPath}`);
+    TestLogger.start("Running integration tests...\n");
   }
 });
 
@@ -98,14 +105,14 @@ test.after.always(async (t) => {
 
     // Save JSON report
     const jsonPath = await reporter.saveJSON(summary);
-    console.log(`\n📊 JSON report saved to: ${jsonPath}`);
+    TestLogger.metrics(`\nJSON report saved to: ${jsonPath}`);
 
     // Save HTML dashboard
     const htmlPath = await reporter.saveHTML(summary, categoryMetrics);
-    console.log(`📈 HTML dashboard saved to: ${htmlPath}`);
-    console.log(`   Open in browser: file://${htmlPath}\n`);
+    TestLogger.document(`HTML dashboard saved to: ${htmlPath}`);
+    TestLogger.plain(`Open in browser: file://${htmlPath}\n`);
   } catch (error) {
-    console.error('⚠️  Failed to generate reports:', error);
+    TestLogger.error(`Failed to generate reports: ${error}`);
   }
 });
 
@@ -117,110 +124,34 @@ for (const testCase of testCases) {
       const { provider, costTracker, outputCapture, reporter, claudeAvailable, pluginInstalled } = t.context as TestContext;
 
       // Skip if Claude not available or plugin not installed
-      if (!claudeAvailable || !pluginInstalled) {
-        t.log("⊘ Skipped - Claude Code CLI or plugin not available");
-        t.pass(); // Mark as passed but skipped
+      if (shouldSkipTest(claudeAvailable, pluginInstalled, t)) {
         return;
       }
 
-      const testStartTime = Date.now();
-
-      // Run the test
-      const result = await provider.runTest(testCase.prompt, {
-        timeout: 120000, // 120s timeout (increased from 90s)
-        maxRetries: 2,   // Retry up to 2 times for timeouts/rate limits
-      });
-
-      const testDuration = Date.now() - testStartTime;
-
-      // Track metrics
-      costTracker.track({
-        provider: provider.name,
-        testId: testCase.id,
-        prompt: testCase.prompt,
-        tokensUsed: result.tokensUsed,
-        cost: result.cost,
-        timestamp: new Date(),
-      });
-
-      // Add to reporter (estimate retry count from duration vs latency)
-      const estimatedRetries = Math.max(0, Math.floor((testDuration - result.latencyMs) / 5000));
-      reporter.addResult({
+      // Execute test with metrics tracking
+      const { result } = await executeTestWithMetrics(
+        provider,
         testCase,
-        result,
-        duration: testDuration,
-        retryCount: estimatedRetries,
-        timestamp: new Date().toISOString(),
-      });
+        costTracker,
+        reporter
+      );
 
       // Log test result
-      t.log(`⏱️  ${result.latencyMs}ms | 🔤 ${result.tokensUsed} tokens`);
+      TestLogger.info(`⏱️  ${result.latencyMs}ms | 🔤 ${result.tokensUsed} tokens`);
 
       // Assert: Test should succeed
       if (!result.success) {
-        // Capture full output for failed test
-        const outputPath = await outputCapture.saveFailedTest({
-          testId: testCase.id,
-          testName: testCase.name,
-          prompt: testCase.prompt,
-          response: result.responseContent,
-          error: result.error,
-          timestamp: new Date().toISOString(),
-          skillTriggered: result.skillTriggered,
-        });
-        t.log(`📄 Full response saved to: ${outputPath}`);
+        await handleTestFailure(t, outputCapture, testCase, result, result.error || 'Unknown error');
         t.fail(`Test execution failed: ${result.error}`);
         return;
       }
       t.true(result.success, "Test execution should succeed");
 
       // Assert: Skill triggering correctness
-      if (testCase.expectedSkill === null) {
-        // Negative test - should NOT trigger UI5 skill
-        if (result.skillTriggered !== null) {
-          t.log(`⚠️  Unexpected skill trigger: ${result.skillTriggered}`);
-          t.log(`Response preview: ${result.responseContent.substring(0, 200)}...`);
-        }
-        t.is(
-          result.skillTriggered,
-          null,
-          `Should NOT trigger UI5 skill for: "${testCase.prompt}"`
-        );
-      } else {
-        // Positive test - should trigger expected skill
-        if (result.skillTriggered !== testCase.expectedSkill) {
-          t.log(`❌ Expected: ${testCase.expectedSkill}`);
-          t.log(`   Got: ${result.skillTriggered || "none"}`);
-          t.log(`Response preview: ${result.responseContent.substring(0, 200)}...`);
-
-          // Capture full response for skill detection failure
-          const outputPath = await outputCapture.saveFailedTest({
-            testId: testCase.id,
-            testName: testCase.name,
-            prompt: testCase.prompt,
-            response: result.responseContent,
-            error: `Skill detection failed: expected ${testCase.expectedSkill}, got ${result.skillTriggered || 'none'}`,
-            timestamp: new Date().toISOString(),
-            skillTriggered: result.skillTriggered,
-          });
-          t.log(`📄 Full response saved to: ${outputPath}`);
-        }
-        t.is(
-          result.skillTriggered,
-          testCase.expectedSkill,
-          `Should trigger "${testCase.expectedSkill}"`
-        );
-      }
+      await assertSkillTriggering(t, result, testCase, outputCapture);
 
       // Assert: Expected content (if specified)
-      if (testCase.expectedContent && result.skillTriggered !== null) {
-        assertContentIncludes(
-          t,
-          result.responseContent,
-          testCase.expectedContent,
-          testCase.name
-        );
-      }
+      assertExpectedContent(t, result, testCase);
     }
   );
 }
@@ -229,9 +160,7 @@ for (const testCase of testCases) {
 test.serial("[Claude Code] Test Summary", (t) => {
   const { provider, costTracker, claudeAvailable, pluginInstalled } = t.context as TestContext;
 
-  if (!claudeAvailable || !pluginInstalled) {
-    t.log("⊘ Skipped - Claude Code CLI or plugin not available");
-    t.pass(); // Mark as passed but skipped
+  if (shouldSkipTest(claudeAvailable, pluginInstalled, t)) {
     return;
   }
 
@@ -240,16 +169,16 @@ test.serial("[Claude Code] Test Summary", (t) => {
   const positiveTests = testCases.filter(tc => tc.expectedSkill !== null).length;
   const negativeTests = testCases.filter(tc => tc.expectedSkill === null).length;
 
-  t.log("\n📊 Claude Code Test Summary:");
-  t.log(`  Total tests: ${testCases.length} (${positiveTests} positive, ${negativeTests} negative)`);
-  t.log(`  Tests executed: ${entries.length}`);
-  t.log(`  Total tokens (estimated): ${totalTokens.toLocaleString()}`);
-  t.log(`  Provider: ${provider.getInfo().description}`);
+  TestLogger.metrics("\nClaude Code Test Summary:");
+  TestLogger.plain(`Total tests: ${testCases.length} (${positiveTests} positive, ${negativeTests} negative)`);
+  TestLogger.plain(`Tests executed: ${entries.length}`);
+  TestLogger.plain(`Total tokens (estimated): ${totalTokens.toLocaleString()}`);
+  TestLogger.plain(`Provider: ${provider.getInfo().description}`);
 
   // Validate actual test count vs expected
   const expectedExecuted = claudeAvailable && pluginInstalled ? testCases.length : 0;
   if (entries.length !== expectedExecuted) {
-    t.log(`⚠️  Expected ${expectedExecuted} tests but executed ${entries.length}`);
+    TestLogger.warning(`Expected ${expectedExecuted} tests but executed ${entries.length}`);
   }
 
   // At least some tests should have run if environment is ready
