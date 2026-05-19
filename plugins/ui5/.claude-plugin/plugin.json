@@ -18,6 +18,14 @@
         "linter",
         "api documentation",
         "development guidelines",
-        "best practices"
-    ]
+        "best practices",
+        "coding standards",
+        "async loading",
+        "odata types",
+        "data binding",
+        "cap integration",
+        "typescript",
+        "csp"
+    ],
+    "skills": ["skills/ui5-best-practices"]
 }
