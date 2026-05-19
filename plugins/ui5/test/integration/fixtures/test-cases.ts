@@ -1,0 +1,296 @@
+/**
+ * Integration test cases for ui5-best-practices skill
+ * Tests real Claude model behavior with Claude Code CLI
+ */
+
+import type { IntegrationTestCase } from '../types.js';
+
+export const testCases: IntegrationTestCase[] = [
+  // Module Loading (2 tests)
+  {
+    id: 1,
+    name: "async-module-loading",
+    description: "Async module loading with sap.ui.define",
+    prompt: "Show me how to use sap.ui.define for async module loading in UI5",
+    category: "module-loading",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "sap.ui.define"
+  },
+  {
+    id: 2,
+    name: "xml-core-require",
+    description: "XML core:require for types",
+    prompt: "How to use core:require in XML views for types?",
+    category: "module-loading",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "core:require"
+  },
+
+  // Data Binding (2 tests)
+  {
+    id: 3,
+    name: "odata-types-priority",
+    description: "OData types for number formatting",
+    prompt: "What data types should I use for number formatting in UI5?",
+    category: "data-binding",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "odata.type.Decimal"
+  },
+  {
+    id: 4,
+    name: "custom-types-validation",
+    description: "Custom type for two-way binding validation",
+    prompt: "How to create a custom type for email validation with two-way binding?",
+    category: "data-binding",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "SimpleType.extend"
+  },
+
+  // CSP Security (1 test)
+  {
+    id: 5,
+    name: "csp-violations",
+    description: "CSP inline content violations",
+    prompt: "What inline content violates CSP in UI5?",
+    category: "security-csp",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "inline"
+  },
+
+  // Form Creation (2 tests)
+  {
+    id: 6,
+    name: "form-layout-choice",
+    description: "Form vs SimpleForm layout choice",
+    prompt: "Should I use SimpleForm or Form with ColumnLayout?",
+    category: "form-creation",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "ColumnLayout"
+  },
+  {
+    id: 7,
+    name: "column-defaults",
+    description: "Form ColumnLayout default columns",
+    prompt: "What are the default column counts for Form ColumnLayout?",
+    category: "form-creation",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "columnsM"
+  },
+
+  // TypeScript Events (2 tests)
+  {
+    id: 8,
+    name: "typed-events-modern",
+    description: "TypeScript event types UI5 >= 1.115.0",
+    prompt: "How to type event handlers in UI5 >= 1.115.0?",
+    category: "typescript-events",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "Button$PressEvent"
+  },
+  {
+    id: 9,
+    name: "typed-events-legacy",
+    description: "TypeScript event types UI5 < 1.115.0",
+    prompt: "How to handle events in UI5 < 1.115.0 TypeScript?",
+    category: "typescript-events",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "Event"
+  },
+
+  // CAP Integration (3 tests)
+  {
+    id: 10,
+    name: "cap-server-command",
+    description: "CAP server command for UI5",
+    prompt: "What command should I run to serve my UI5 app in a CAP project?",
+    category: "cap-integration",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "cds watch"
+  },
+  {
+    id: 11,
+    name: "cap-project-location",
+    description: "CAP UI5 app location",
+    prompt: "Where should I create UI5 apps in a CAP project?",
+    category: "cap-integration",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "app/"
+  },
+  {
+    id: 12,
+    name: "cap-no-proxy",
+    description: "CAP no proxy needed",
+    prompt: "Do I need ui5-middleware-simpleproxy in a CAP project?",
+    category: "cap-integration",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "same origin"
+  },
+
+  // MCP Tooling (2 tests)
+  {
+    id: 13,
+    name: "api-reference-tool",
+    description: "UI5 API reference lookup",
+    prompt: "How do I look up UI5 control APIs?",
+    category: "mcp-tooling",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "get_api_reference"
+  },
+  {
+    id: 14,
+    name: "linter-tool",
+    description: "UI5 code quality validation",
+    prompt: "How to validate my UI5 code quality?",
+    category: "mcp-tooling",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "linter"
+  },
+
+  // i18n (2 tests)
+  {
+    id: 15,
+    name: "i18n-workflow-s4hana",
+    description: "i18n workflow for S/4HANA apps",
+    prompt: "Can I manually edit i18n_de.properties in an S/4HANA app?",
+    category: "i18n",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "translation"
+  },
+  {
+    id: 16,
+    name: "i18n-base-file",
+    description: "i18n base file during development",
+    prompt: "Which i18n file should I update during development?",
+    category: "i18n",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "i18n.properties"
+  },
+
+  // Component Initialization (1 test)
+  {
+    id: 17,
+    name: "component-support",
+    description: "Declarative component initialization",
+    prompt: "How to initialize the root component declaratively?",
+    category: "component-init",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "ComponentSupport"
+  },
+
+  // CSP Directive-Specific (1 test)
+  {
+    id: 18,
+    name: "csp-script-src",
+    description: "CSP script-src directive for UI5",
+    prompt: "What should I set for script-src in Content Security Policy for UI5?",
+    category: "security-csp",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "script-src"
+  },
+
+  // Test Coverage Setup (1 test)
+  {
+    id: 19,
+    name: "test-starter-istanbul",
+    description: "Istanbul coverage with Test Starter",
+    prompt: "How do I set up code coverage with Istanbul in UI5 Test Starter?",
+    category: "testing",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "istanbul"
+  },
+
+  // XML Event Advanced Patterns (1 test)
+  {
+    id: 20,
+    name: "xml-event-model-binding",
+    description: "XML event with model property access",
+    prompt: "How to pass model properties to event handlers in XML views?",
+    category: "typescript-events",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "$"
+  },
+
+  // ts-interface-generator Troubleshooting (1 test)
+  {
+    id: 21,
+    name: "ts-interface-generator-issues",
+    description: "Common ts-interface-generator problems",
+    prompt: "What are common issues with ts-interface-generator in UI5 TypeScript projects?",
+    category: "typescript-events",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "interface"
+  },
+
+  // OPA5 TypeScript Pattern (1 test)
+  {
+    id: 22,
+    name: "opa5-typescript-class",
+    description: "OPA5 class-based pattern for TypeScript",
+    prompt: "How to write OPA5 page objects in TypeScript using class-based pattern?",
+    category: "testing",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "class"
+  },
+
+  // Chart Feed UID Debugging (1 test)
+  {
+    id: 23,
+    name: "chart-feed-uid-mismatch",
+    description: "Chart feed UID mismatch debugging",
+    prompt: "Why is my UI5 chart not displaying data? Feed UID mismatch error",
+    category: "data-binding",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "uid"
+  },
+
+  // Integration Cards Data Path Anti-Pattern (1 test)
+  {
+    id: 24,
+    name: "integration-cards-data-path",
+    description: "Integration Cards data path best practices",
+    prompt: "Should I use absolute paths in Integration Cards data configuration?",
+    category: "mcp-tooling",
+    expectedSkill: "ui5-best-practices",
+    expectedContent: "relative"
+  },
+
+  // Negative Test Cases (3 tests)
+  {
+    id: 25,
+    name: "negative-react",
+    description: "React hooks (should NOT trigger)",
+    prompt: "How do I use React hooks?",
+    category: "negative",
+    expectedSkill: null,
+  },
+  {
+    id: 26,
+    name: "negative-vue",
+    description: "Vue.js reactivity (should NOT trigger)",
+    prompt: "Vue.js reactive data binding",
+    category: "negative",
+    expectedSkill: null,
+  },
+  {
+    id: 27,
+    name: "negative-python",
+    description: "Python types (should NOT trigger)",
+    prompt: "Python type hints tutorial",
+    category: "negative",
+    expectedSkill: null,
+  }
+];
+
+export const testCasesByCategory = {
+  "module-loading": testCases.filter(tc => tc.category === "module-loading"),
+  "data-binding": testCases.filter(tc => tc.category === "data-binding"),
+  "security-csp": testCases.filter(tc => tc.category === "security-csp"),
+  "form-creation": testCases.filter(tc => tc.category === "form-creation"),
+  "typescript-events": testCases.filter(tc => tc.category === "typescript-events"),
+  "cap-integration": testCases.filter(tc => tc.category === "cap-integration"),
+  "mcp-tooling": testCases.filter(tc => tc.category === "mcp-tooling"),
+  "i18n": testCases.filter(tc => tc.category === "i18n"),
+  "component-init": testCases.filter(tc => tc.category === "component-init"),
+  "testing": testCases.filter(tc => tc.category === "testing"),
+  "negative": testCases.filter(tc => tc.category === "negative")
+};

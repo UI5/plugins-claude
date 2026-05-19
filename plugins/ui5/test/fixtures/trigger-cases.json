@@ -1,0 +1,203 @@
+{
+  "version": "2.0.0",
+  "description": "Skill triggering test cases for ui5-best-practices (single skill scope)",
+  "tests": [
+    {
+      "prompt": "How do I set up async module loading in UI5?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "module-loading"
+    },
+    {
+      "prompt": "Show me sap.ui.define usage",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "module-loading"
+    },
+    {
+      "prompt": "What's the best way to configure CSP in Component.js?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "security-csp"
+    },
+    {
+      "prompt": "How to use OData types in data binding?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "data-binding"
+    },
+    {
+      "prompt": "Show me sap.ui.model.odata.type.Decimal example",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "data-binding"
+    },
+    {
+      "prompt": "What's the correct way to create forms in UI5?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "form-creation"
+    },
+    {
+      "prompt": "Should I use SimpleForm or ColumnLayout?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "form-creation"
+    },
+    {
+      "prompt": "How to handle Button$PressEvent in TypeScript?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "typescript-events"
+    },
+    {
+      "prompt": "Show me control-specific event types for UI5 >= 1.115.0",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "typescript-events"
+    },
+    {
+      "prompt": "How to integrate UI5 with CAP?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "cap-integration"
+    },
+    {
+      "prompt": "Should I run ui5 serve or cds watch for CAP projects?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "cap-integration"
+    },
+    {
+      "prompt": "How to use get_api_reference tool?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "mcp-tooling"
+    },
+    {
+      "prompt": "Run ui5 linter on my project",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "mcp-tooling"
+    },
+    {
+      "prompt": "What's the i18n translation workflow for S/4HANA apps?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "i18n"
+    },
+    {
+      "prompt": "Should I edit i18n_de.properties manually?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "i18n"
+    },
+    {
+      "prompt": "How to use ComponentSupport for initialization?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "component-init"
+    },
+    {
+      "prompt": "Show me declarative component initialization",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "component-init"
+    },
+    {
+      "prompt": "When should I use custom types vs OData types?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "data-binding"
+    },
+    {
+      "prompt": "Show me SimpleType.extend for email validation",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "data-binding"
+    },
+    {
+      "prompt": "How to avoid inline scripts and styles (CSP)?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "security-csp"
+    },
+    {
+      "prompt": "What should I set for script-src in Content Security Policy for UI5?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "security-csp"
+    },
+    {
+      "prompt": "How do I set up code coverage with Istanbul in UI5 Test Starter?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "testing"
+    },
+    {
+      "prompt": "How to pass model properties to event handlers in XML views?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "typescript-events"
+    },
+    {
+      "prompt": "What are common issues with ts-interface-generator in UI5 TypeScript projects?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "typescript-events"
+    },
+    {
+      "prompt": "How to write OPA5 page objects in TypeScript using class-based pattern?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "testing"
+    },
+    {
+      "prompt": "Why is my UI5 chart not displaying data? Feed UID mismatch error",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "data-binding"
+    },
+    {
+      "prompt": "Should I use absolute paths in Integration Cards data configuration?",
+      "expected_skill": "ui5-best-practices",
+      "should_trigger": true,
+      "category": "mcp-tooling"
+    },
+    {
+      "prompt": "How do I use React hooks?",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Not UI5-related",
+      "category": "negative"
+    },
+    {
+      "prompt": "Python type hints tutorial",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Not UI5-related",
+      "category": "negative"
+    },
+    {
+      "prompt": "Create a REST API with Express",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Not UI5-related",
+      "category": "negative"
+    },
+    {
+      "prompt": "How to use Angular components?",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Different framework",
+      "category": "negative"
+    },
+    {
+      "prompt": "Vue.js reactive data binding",
+      "expected_skill": null,
+      "should_trigger": false,
+      "reason": "Different framework",
+      "category": "negative"
+    }
+  ]
+}
