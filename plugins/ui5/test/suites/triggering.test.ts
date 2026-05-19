@@ -41,6 +41,7 @@ function simulateTriggering(prompt: string, _description: string): boolean {
     'odata',
     'csp',
     'cap',
+    'component',
     'componentsupp',
     'simpleform',
     'columnlayout',
@@ -50,7 +51,13 @@ function simulateTriggering(prompt: string, _description: string): boolean {
     'i18n',
     'translation',
     'get_api_reference',
-    'run_ui5_linter'
+    'run_ui5_linter',
+    'simpletype',
+    'validation',
+    'event handler',
+    'xml view',
+    'opa5',
+    'integration card'
   ];
 
   // Check if prompt contains any UI5-related keywords
