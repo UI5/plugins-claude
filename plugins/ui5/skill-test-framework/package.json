@@ -1,0 +1,29 @@
+{
+  "name": "@skill-test-framework/core",
+  "version": "0.1.0",
+  "description": "Agent-agnostic skill testing framework for Claude Code plugins",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "claude",
+    "testing",
+    "skill",
+    "agent",
+    "quality"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
