@@ -122,7 +122,7 @@ TEST_VERBOSE=1 npm run test:integration
 
 🔍 Test: "What inline content violates CSP in UI5?"
 ⏱️  Start time: 2026-05-18T10:30:45.000Z
-🔌 Environment: CLAUDE_PLUGINS=ui5-guidelines
+🔌 Environment: CLAUDE_PLUGINS=ui5
 ⏰ Timeout: 120000ms
 
 # ... test runs ...

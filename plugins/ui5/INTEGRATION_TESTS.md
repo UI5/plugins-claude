@@ -20,8 +20,8 @@ Integration tests validate real Claude behavior using the Claude Code CLI. Unlik
 
 ### Optional
 
-- Plugin symlinked to `~/.claude/plugins/ui5-guidelines`
-- Environment variable: `CLAUDE_PLUGINS="ui5-guidelines"`
+- Plugin symlinked to `~/.claude/plugins/ui5`
+- Environment variable: `CLAUDE_PLUGINS="ui5"`
 
 ---
 
@@ -30,7 +30,7 @@ Integration tests validate real Claude behavior using the Claude Code CLI. Unlik
 ### Full Test Suite
 
 ```bash
-cd plugins/ui5-guidelines
+cd plugins/ui5
 npm run test:integration:claude
 ```
 
@@ -164,7 +164,7 @@ Default: 60 seconds per test
 
 ### Environment
 
-Tests set `CLAUDE_PLUGINS="ui5-guidelines"` to ensure only the target plugin is loaded.
+Tests set `CLAUDE_PLUGINS="ui5"` to ensure only the target plugin is loaded.
 
 ### Stdin Handling
 
@@ -413,12 +413,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd plugins/ui5-guidelines
+          cd plugins/ui5
           npm install
 
       - name: Run integration tests
         run: |
-          cd plugins/ui5-guidelines
+          cd plugins/ui5
           npm run build
           npm run test:integration:claude
 ```

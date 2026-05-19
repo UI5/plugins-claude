@@ -146,14 +146,14 @@ const runner = new TestRunner(evaluator);
 runner.registerAgent(new ClaudeCodeAdapter({ verbose: true }));
 
 // 4. Load skill
-await runner.loadSkill('/path/to/ui5-guidelines');
+await runner.loadSkill('/path/to/ui5');
 
 // 5. Define test suite
 const suite: TestSuite = {
   id: 'ui5-integration',
   name: 'UI5 Best Practices Integration Tests',
   description: 'Test UI5 skill with real Claude',
-  skillPath: '/path/to/ui5-guidelines',
+  skillPath: '/path/to/ui5',
   testCases: [
     {
       id: '1',

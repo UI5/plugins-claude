@@ -123,7 +123,7 @@ npm run test:integration
 **Output**:
 ```
 ✅ Claude Code CLI available
-✅ Plugin installed at: /Users/.../.claude/plugins/ui5-guidelines
+✅ Plugin installed at: /Users/.../.claude/plugins/ui5
 🚀 Running integration tests...
 
 [... tests run ...]

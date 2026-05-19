@@ -314,7 +314,7 @@ async function testWithAPI(prompt: string) {
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 4096,
-    tools: [/* ui5-guidelines tool definition */],
+    tools: [/* ui5 tool definition */],
     messages: [{ role: 'user', content: prompt }],
   });
   

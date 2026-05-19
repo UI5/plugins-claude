@@ -96,7 +96,7 @@ export class ClaudeCodeProvider extends BaseProvider {
     if (verbose) {
       console.log(`\n🔍 Test: "${prompt}"`);
       console.log(`⏱️  Start time: ${new Date(startTime).toISOString()}`);
-      console.log(`🔌 Environment: CLAUDE_PLUGINS=${process.env.CLAUDE_PLUGINS || 'ui5-guidelines'}`);
+      console.log(`🔌 Environment: CLAUDE_PLUGINS=${process.env.CLAUDE_PLUGINS || 'ui5'}`);
       console.log(`⏰ Timeout: ${config.timeout || 60000}ms`);
     }
 
@@ -122,8 +122,8 @@ export class ClaudeCodeProvider extends BaseProvider {
       const child = spawn("claude", [prompt], {
         env: {
           ...process.env,
-          // Enable only ui5-guidelines plugin for testing
-          CLAUDE_PLUGINS: "ui5-guidelines",
+          // Enable only ui5 plugin for testing
+          CLAUDE_PLUGINS: "ui5",
           // Disable extended thinking (not supported in all contexts)
           MAX_THINKING_TOKENS: "0",
         },

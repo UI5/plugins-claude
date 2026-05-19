@@ -19,7 +19,7 @@ The UI5 Guidelines plugin has a **three-level testing approach** to ensure quali
 **Purpose**: Fast, deterministic validation of plugin configuration and file structure.
 
 **What it tests**:
-- ✅ Plugin metadata validation ([plugin.json](plugins/ui5-guidelines/.claude-plugin/plugin.json))
+- ✅ Plugin metadata validation ([plugin.json](plugins/ui5/.claude-plugin/plugin.json))
 - ✅ Skill file existence and structure
 - ✅ YAML frontmatter validity
 - ✅ Skill token budget (warning at 700 lines, current: ~510 lines)
@@ -120,7 +120,7 @@ npm run test:triggering     # Simulated keyword matching
 
 **Run**:
 ```bash
-cd plugins/ui5-guidelines
+cd plugins/ui5
 npm run test:integration:claude
 ```
 
@@ -192,7 +192,7 @@ const tokensUsed = Math.ceil((prompt.length + response.length) / 4);
 
 **Timeout**: Default 90 seconds per test (configurable via `TEST_TIMEOUT` env var)
 
-**Environment**: Tests set `CLAUDE_PLUGINS="ui5-guidelines"` to ensure only the target plugin is loaded
+**Environment**: Tests set `CLAUDE_PLUGINS="ui5"` to ensure only the target plugin is loaded
 
 **Stdin Handling**: Uses `spawn` with `stdio: ['ignore', 'pipe', 'pipe']` to prevent "waiting for stdin" timeouts
 
@@ -238,7 +238,7 @@ const tokensUsed = Math.ceil((prompt.length + response.length) / 4);
 ### Quick Start
 
 ```bash
-cd plugins/ui5-guidelines
+cd plugins/ui5
 npm install
 npm run build
 

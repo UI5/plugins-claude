@@ -4,7 +4,7 @@
 
 Integration tests successfully validate that:
 1. ✅ Claude Code CLI is properly configured with plugin support
-2. ✅ ui5-guidelines plugin can be loaded via `CLAUDE_PLUGINS` environment variable
+2. ✅ ui5 plugin can be loaded via `CLAUDE_PLUGINS` environment variable
 3. ✅ Extended thinking compatibility issue identified and fixed
 4. ⚠️ Skill triggering rate: 40% (8/20 tests), with 35% failures and 25% timeouts
 
@@ -28,7 +28,7 @@ Set `MAX_THINKING_TOKENS=0` environment variable to disable extended thinking:
 const child = spawn("claude", [prompt], {
   env: {
     ...process.env,
-    CLAUDE_PLUGINS: "ui5-guidelines",
+    CLAUDE_PLUGINS: "ui5",
     MAX_THINKING_TOKENS: "0",  // Disable extended thinking
   },
   stdio: ['ignore', 'pipe', 'pipe'],
@@ -38,7 +38,7 @@ const child = spawn("claude", [prompt], {
 ### Verification
 Manual test confirmed fix works:
 ```bash
-CLAUDE_PLUGINS="ui5-guidelines" MAX_THINKING_TOKENS=0 claude "Show me how to use sap.ui.define"
+CLAUDE_PLUGINS="ui5" MAX_THINKING_TOKENS=0 claude "Show me how to use sap.ui.define"
 # ✅ Works correctly - returns UI5 response with proper UI5 patterns
 ```
 
@@ -53,20 +53,20 @@ Tests assumed plugin was installed but never verified it, leading to unclear fai
 Added pre-flight check in `test.before()`:
 
 ```typescript
-const pluginPath = join(homedir(), '.claude', 'plugins', 'ui5-guidelines');
+const pluginPath = join(homedir(), '.claude', 'plugins', 'ui5');
 pluginInstalled = existsSync(pluginPath);
 
 if (!pluginInstalled) {
-  console.warn("\n⚠️  ui5-guidelines plugin not installed");
+  console.warn("\n⚠️  ui5 plugin not installed");
   console.warn(`   Expected at: ${pluginPath}`);
-  console.warn("   Run: ln -s $(pwd) ~/.claude/plugins/ui5-guidelines");
+  console.warn("   Run: ln -s $(pwd) ~/.claude/plugins/ui5");
 }
 ```
 
 ### Output
 ```
 ✅ Claude Code CLI available
-✅ Plugin installed at: /Users/i326076/.claude/plugins/ui5-guidelines
+✅ Plugin installed at: /Users/i326076/.claude/plugins/ui5
 🚀 Running integration tests...
 ```
 
@@ -115,10 +115,10 @@ if (!pluginInstalled) {
 ## How Skill Loading is Verified
 
 ### 1. Plugin Installation Check
-Before running tests, verify plugin exists at `~/.claude/plugins/ui5-guidelines`
+Before running tests, verify plugin exists at `~/.claude/plugins/ui5`
 
 ### 2. Environment Variable
-Set `CLAUDE_PLUGINS="ui5-guidelines"` to ensure only target plugin is loaded
+Set `CLAUDE_PLUGINS="ui5"` to ensure only target plugin is loaded
 
 ### 3. Skill Detection (Heuristic)
 Tests detect skill usage by looking for 2+ UI5-specific patterns in response:
@@ -161,7 +161,7 @@ Tests failed NOT because skill didn't respond, but because:
 
 ### 4. Environment Configuration Working ✅
 - Plugin installation verified before tests
-- `CLAUDE_PLUGINS="ui5-guidelines"` set correctly
+- `CLAUDE_PLUGINS="ui5"` set correctly
 - `MAX_THINKING_TOKENS=0` fixed extended thinking issue
 - Tests run in clean environment
 
@@ -198,7 +198,7 @@ Tests failed NOT because skill didn't respond, but because:
 ### Environment Variables Set
 ```typescript
 {
-  CLAUDE_PLUGINS: "ui5-guidelines",    // Enable only target plugin
+  CLAUDE_PLUGINS: "ui5",    // Enable only target plugin
   MAX_THINKING_TOKENS: "0",            // Disable extended thinking (required!)
 }
 ```
@@ -213,7 +213,7 @@ Tests failed NOT because skill didn't respond, but because:
 
 Integration tests successfully validate that:
 1. ✅ Plugin infrastructure works correctly
-2. ✅ Claude can access and use the ui5-guidelines skill
+2. ✅ Claude can access and use the ui5 skill
 3. ✅ Skill provides accurate UI5 guidance when triggered
 4. ⚠️ Skill triggering is not 100% reliable (40% detection rate)
 5. ⚠️ Heuristic detection has limitations

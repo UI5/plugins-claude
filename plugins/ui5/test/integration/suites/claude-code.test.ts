@@ -29,7 +29,7 @@ test.before(async (t) => {
   const claudeAvailable = await provider.isAvailable();
 
   // Check if plugin is installed
-  const pluginPath = join(homedir(), '.claude', 'plugins', 'ui5-guidelines');
+  const pluginPath = join(homedir(), '.claude', 'plugins', 'ui5');
   const pluginInstalled = existsSync(pluginPath);
 
   // Initialize reporter
@@ -53,9 +53,9 @@ test.before(async (t) => {
     console.warn("   Install from: https://claude.ai/code");
     console.warn("   Skipping all Claude Code integration tests\n");
   } else if (!pluginInstalled) {
-    console.warn("\n⚠️  ui5-guidelines plugin not installed");
+    console.warn("\n⚠️  ui5 plugin not installed");
     console.warn(`   Expected at: ${pluginPath}`);
-    console.warn("   Run: ln -s $(pwd) ~/.claude/plugins/ui5-guidelines");
+    console.warn("   Run: ln -s $(pwd) ~/.claude/plugins/ui5");
     console.warn("   Skipping all Claude Code integration tests\n");
   } else {
     console.log("\n✅ Claude Code CLI available");

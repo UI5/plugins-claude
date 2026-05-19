@@ -62,7 +62,7 @@ Create a **reusable testing framework** that can:
               │
 ┌─────────────────────────────────────┐
 │   TESTS (Skill-Specific)            │
-│   - ui5-guidelines test cases       │
+│   - ui5 test cases       │
 │   - Quality thresholds config       │
 │   - Expected patterns               │
 │   - Validation rules                │
@@ -156,10 +156,10 @@ skill-test-framework/
 
 ### Layer 2: Skill-Specific Tests
 
-**Location**: `plugins/ui5-guidelines/tests/` (within skill project)
+**Location**: `plugins/ui5/tests/` (within skill project)
 
 ```
-plugins/ui5-guidelines/
+plugins/ui5/
 ├── tests/
 │   ├── config/
 │   │   ├── quality-thresholds.ts   # BAD/OKish/Good thresholds
@@ -865,7 +865,7 @@ project-root/
 │       └── README.md
 │
 └── plugins/
-    └── ui5-guidelines/               # Skill project
+    └── ui5/               # Skill project
         ├── skills/
         │   └── ui5-best-practices/
         │       └── SKILL.md
@@ -1080,7 +1080,7 @@ project-root/
 **Impact**: Not reusable for other skills
 **Mitigation**:
 - Separate framework code from day one
-- No ui5-guidelines-specific code in framework
+- No ui5-specific code in framework
 - Clear dependency boundaries
 - Publish as npm package
 
@@ -1107,7 +1107,7 @@ project-root/
 - ✅ Be extractable as standalone package
 
 ### Tests Must:
-- ✅ Validate ui5-guidelines skill structure
+- ✅ Validate ui5 skill structure
 - ✅ Assess skill performance/efficiency
 - ✅ Simulate triggering with 20+ test cases
 - ✅ Execute live tests with Claude Code CLI

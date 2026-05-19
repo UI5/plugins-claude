@@ -13,12 +13,12 @@ Successfully identified, documented, and partially implemented solutions to impr
 ### Answer: 4-Layer Verification
 
 1. **Plugin Installation Check** ✅
-   - Tests verify plugin exists at `~/.claude/plugins/ui5-guidelines`
+   - Tests verify plugin exists at `~/.claude/plugins/ui5`
    - Pre-flight check before running any tests
    - Clear status messages displayed
 
 2. **Environment Configuration** ✅
-   - `CLAUDE_PLUGINS="ui5-guidelines"` ensures only target plugin loads
+   - `CLAUDE_PLUGINS="ui5"` ensures only target plugin loads
    - `MAX_THINKING_TOKENS=0` fixes extended thinking incompatibility
    - Clean environment per test
 
@@ -34,7 +34,7 @@ Successfully identified, documented, and partially implemented solutions to impr
 ### Output
 ```
 ✅ Claude Code CLI available
-✅ Plugin installed at: /Users/i326076/.claude/plugins/ui5-guidelines
+✅ Plugin installed at: /Users/i326076/.claude/plugins/ui5
 🚀 Running integration tests...
 ```
 

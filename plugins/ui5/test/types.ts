@@ -1,5 +1,5 @@
 /**
- * Type definitions for ui5-guidelines plugin tests
+ * Type definitions for ui5 plugin tests
  */
 
 export interface PluginMetadata {
