@@ -299,6 +299,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 9. stacked_bar
     * UIDs: dataFrame, categoryAxis, color, valueAxis
+    * Note: Stacking requires a second dimension fed to `color`; without it the chart renders as a plain bar
     * Example:
         ```json
         {
@@ -312,6 +313,10 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "name": "Region",
               "value": "{regionField}"
+            },
+            {
+              "name": "Product",
+              "value": "{productField}"
             }
           ],
           "feeds": [
@@ -324,6 +329,11 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
               "type": "Measure",
               "uid": "valueAxis",
               "values": ["Revenue"]
+            },
+            {
+              "type": "Dimension",
+              "uid": "color",
+              "values": ["Product"]
             }
           ]
         }
@@ -331,6 +341,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 10. stacked_column
     * UIDs: dataFrame, categoryAxis, color, valueAxis
+    * Note: Stacking requires a second dimension fed to `color`; without it the chart renders as a plain column
     * Example:
         ```json
         {
@@ -344,6 +355,10 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "name": "Sector",
               "value": "{sectorField}"
+            },
+            {
+              "name": "Product",
+              "value": "{productField}"
             }
           ],
           "feeds": [
@@ -356,6 +371,11 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
               "type": "Measure",
               "uid": "valueAxis",
               "values": ["Market Share"]
+            },
+            {
+              "type": "Dimension",
+              "uid": "color",
+              "values": ["Product"]
             }
           ]
         }
@@ -396,6 +416,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 12. 100_stacked_bar
     * UIDs: dataFrame, categoryAxis, color, valueAxis
+    * Note: Stacking requires a second dimension fed to `color`; without it the chart renders as a plain bar
     * Example:
         ```json
         {
@@ -409,6 +430,10 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "name": "Region",
               "value": "{regionField}"
+            },
+            {
+              "name": "Category",
+              "value": "{categoryField}"
             }
           ],
           "feeds": [
@@ -421,6 +446,11 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
               "type": "Measure",
               "uid": "valueAxis",
               "values": ["Costs"]
+            },
+            {
+              "type": "Dimension",
+              "uid": "color",
+              "values": ["Category"]
             }
           ]
         }
@@ -428,6 +458,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 13. 100_stacked_column
     * UIDs: dataFrame, categoryAxis, color, valueAxis
+    * Note: Stacking requires a second dimension fed to `color`; without it the chart renders as a plain column
     * Example:
         ```json
         {
@@ -441,6 +472,10 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "name": "Product",
               "value": "{productField}"
+            },
+            {
+              "name": "Region",
+              "value": "{regionField}"
             }
           ],
           "feeds": [
@@ -453,6 +488,11 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
               "type": "Measure",
               "uid": "valueAxis",
               "values": ["Market Share"]
+            },
+            {
+              "type": "Dimension",
+              "uid": "color",
+              "values": ["Region"]
             }
           ]
         }
@@ -763,6 +803,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 22. bubble
     * UIDs: dataFrame, color, shape, valueAxis, valueAxis2, bubbleWidth
+    * Note: Requires at least 3 measures (for valueAxis, valueAxis2, and bubbleWidth)
     * Example:
         ```json
         {
@@ -770,6 +811,10 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "name": "Expansion",
               "value": "{expansionField}"
+            },
+            {
+              "name": "Cost",
+              "value": "{costField}"
             },
             {
               "name": "Size",
@@ -785,6 +830,16 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
           "feeds": [
             {
               "type": "Measure",
+              "uid": "valueAxis",
+              "values": ["Expansion"]
+            },
+            {
+              "type": "Measure",
+              "uid": "valueAxis2",
+              "values": ["Cost"]
+            },
+            {
+              "type": "Measure",
               "uid": "bubbleWidth",
               "values": ["Size"]
             },
@@ -792,18 +847,14 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
               "type": "Dimension",
               "uid": "color",
               "values": ["Sector"]
-            },
-            {
-              "type": "Measure",
-              "uid": "valueAxis",
-              "values": ["Expansion"]
             }
           ]
         }
         ```
 
 23. time_bubble
-    * UIDs: dataFrame, color, shape, valueAxis, valueAxis2, bubbleWidth
+    * UIDs: dataFrame, color, shape, valueAxis, valueAxis2, bubbleWidth, timeAxis
+    * Note: Requires timeAxis dimension, at least 2 measures (for valueAxis and bubbleWidth), and a color dimension
     * Example:
         ```json
         {
@@ -813,6 +864,10 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
               "value": "{expansionField}"
             },
             {
+              "name": "Growth",
+              "value": "{growthField}"
+            },
+            {
               "name": "Size",
               "value": "{sizeField}"
             }
@@ -820,7 +875,8 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
           "dimensions": [
             {
               "name": "Year",
-              "value": "{yearField}"
+              "value": "{yearField}",
+              "dataType": "date"
             },
             {
               "name": "Sector",
@@ -832,6 +888,16 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
               "type": "Dimension",
               "uid": "timeAxis",
               "values": ["Year"]
+            },
+            {
+              "type": "Measure",
+              "uid": "valueAxis",
+              "values": ["Expansion"]
+            },
+            {
+              "type": "Measure",
+              "uid": "valueAxis2",
+              "values": ["Growth"]
             },
             {
               "type": "Measure",
@@ -849,6 +915,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 24. timeseries_bubble
     * UIDs: color, shape, valueAxis, timeAxis, bubbleWidth
+    * Note: Requires timeAxis dimension with dataType "date", bubbleWidth measure, and valueAxis measure
     * Example:
         ```json
         {
@@ -900,6 +967,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 25. scatter
     * UIDs: dataFrame, color, shape, valueAxis, valueAxis2
+    * Note: Requires 2 measures for valueAxis and valueAxis2
     * Example:
         ```json
         {
@@ -1038,6 +1106,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 29. vertical_bullet
     * UIDs: categoryAxis, color, actualValues, additionalValues, targetValues, forecastValues
+    * Note: `targetValues` expects a measure (target value), not a dimension
     * Example:
         ```json
         {
@@ -1045,24 +1114,33 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "name": "Achievement",
               "value": "{achievementField}"
+            },
+            {
+              "name": "Target",
+              "value": "{targetField}"
             }
           ],
           "dimensions": [
             {
-              "name": "Target",
-              "value": "{targetField}"
+              "name": "KPI Name",
+              "value": "{kpiNameField}"
             }
           ],
           "feeds": [
             {
               "type": "Dimension",
               "uid": "categoryAxis",
-              "values": ["Target"]
+              "values": ["KPI Name"]
             },
             {
               "type": "Measure",
               "uid": "actualValues",
               "values": ["Achievement"]
+            },
+            {
+              "type": "Measure",
+              "uid": "targetValues",
+              "values": ["Target"]
             }
           ]
         }
@@ -1070,6 +1148,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 30. bullet
     * UIDs: categoryAxis, color, actualValues, additionalValues, targetValues, forecastValues
+    * Note: `targetValues` expects a measure (target value), not a dimension
     * Example:
         ```json
         {
@@ -1077,24 +1156,33 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "name": "Achievement",
               "value": "{achievementField}"
+            },
+            {
+              "name": "Target",
+              "value": "{targetField}"
             }
           ],
           "dimensions": [
             {
-              "name": "Target",
-              "value": "{targetField}"
+              "name": "KPI Name",
+              "value": "{kpiNameField}"
             }
           ],
           "feeds": [
             {
               "type": "Dimension",
               "uid": "categoryAxis",
-              "values": ["Target"]
+              "values": ["KPI Name"]
             },
             {
               "type": "Measure",
               "uid": "actualValues",
               "values": ["Achievement"]
+            },
+            {
+              "type": "Measure",
+              "uid": "targetValues",
+              "values": ["Target"]
             }
           ]
         }
@@ -1135,6 +1223,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 32. waterfall
     * UIDs: categoryAxis, waterfallType, valueAxis
+    * Note: `waterfallType` is optional but recommended; it distinguishes total bars from running positive/negative changes
     * Example:
         ```json
         {
@@ -1148,6 +1237,10 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "name": "Phase",
               "value": "{phaseField}"
+            },
+            {
+              "name": "Type",
+              "value": "{typeField}"
             }
           ],
           "feeds": [
@@ -1160,6 +1253,11 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
               "type": "Measure",
               "uid": "valueAxis",
               "values": ["Change"]
+            },
+            {
+              "type": "Dimension",
+              "uid": "waterfallType",
+              "values": ["Type"]
             }
           ]
         }
@@ -1200,6 +1298,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 34. horizontal_waterfall
     * UIDs: categoryAxis, waterfallType, valueAxis
+    * Note: `waterfallType` is optional but recommended; it distinguishes total bars from running positive/negative changes
     * Example:
         ```json
         {
@@ -1213,6 +1312,10 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "name": "Milestone",
               "value": "{milestoneField}"
+            },
+            {
+              "name": "Type",
+              "value": "{typeField}"
             }
           ],
           "feeds": [
@@ -1225,6 +1328,11 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
               "type": "Measure",
               "uid": "valueAxis",
               "values": ["Growth"]
+            },
+            {
+              "type": "Dimension",
+              "uid": "waterfallType",
+              "values": ["Type"]
             }
           ]
         }
@@ -1232,6 +1340,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 35. combination
     * UIDs: dataFrame, categoryAxis, color, valueAxis
+    * Note: Requires at least 2 measures in the valueAxis feed for proper rendering
     * Example:
         ```json
         {
@@ -1239,6 +1348,10 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "name": "Expense",
               "value": "{expenseField}"
+            },
+            {
+              "name": "Revenue",
+              "value": "{revenueField}"
             }
           ],
           "dimensions": [
@@ -1256,7 +1369,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "type": "Measure",
               "uid": "valueAxis",
-              "values": ["Expense"]
+              "values": ["Expense", "Revenue"]
             }
           ]
         }
@@ -1264,6 +1377,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 36. stacked_combination
     * UIDs: dataFrame, categoryAxis, color, valueAxis
+    * Note: Requires at least 2 measures in the valueAxis feed for proper rendering
     * Example:
         ```json
         {
@@ -1271,6 +1385,10 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "name": "Revenue",
               "value": "{revenueField}"
+            },
+            {
+              "name": "Sales",
+              "value": "{salesField}"
             }
           ],
           "dimensions": [
@@ -1288,7 +1406,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "type": "Measure",
               "uid": "valueAxis",
-              "values": ["Revenue"]
+              "values": ["Revenue", "Sales"]
             }
           ]
         }
@@ -1296,6 +1414,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 37. horizontal_stacked_combination
     * UIDs: dataFrame, categoryAxis, color, valueAxis
+    * Note: Requires at least 2 measures in the valueAxis feed for proper rendering
     * Example:
         ```json
         {
@@ -1303,6 +1422,10 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "name": "Growth",
               "value": "{growthField}"
+            },
+            {
+              "name": "Revenue",
+              "value": "{revenueField}"
             }
           ],
           "dimensions": [
@@ -1320,7 +1443,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "type": "Measure",
               "uid": "valueAxis",
-              "values": ["Growth"]
+              "values": ["Growth", "Revenue"]
             }
           ]
         }
@@ -1492,6 +1615,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 42. timeseries_combination
     * UIDs: timeAxis, color, valueAxis
+    * Note: Requires at least 2 measures in the valueAxis feed for proper rendering
     * Example:
         ```json
         {
@@ -1499,6 +1623,10 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "name": "Earnings",
               "value": "{earningsField}"
+            },
+            {
+              "name": "Revenue",
+              "value": "{revenueField}"
             }
           ],
           "dimensions": [
@@ -1517,7 +1645,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "type": "Measure",
               "uid": "valueAxis",
-              "values": ["Earnings"]
+              "values": ["Earnings", "Revenue"]
             }
           ]
         }
@@ -1567,6 +1695,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
 
 44. timeseries_stacked_combination
     * UIDs: timeAxis, color, valueAxis
+    * Note: Requires at least 2 measures in the valueAxis feed for proper rendering
     * Example:
         ```json
         {
@@ -1574,6 +1703,10 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "name": "Performance",
               "value": "{performanceField}"
+            },
+            {
+              "name": "Revenue",
+              "value": "{revenueField}"
             }
           ],
           "dimensions": [
@@ -1592,7 +1725,7 @@ For each chart type, the `feeds` array must use the listed UIDs to bind the corr
             {
               "type": "Measure",
               "uid": "valueAxis",
-              "values": ["Performance"]
+              "values": ["Performance", "Revenue"]
             }
           ]
         }

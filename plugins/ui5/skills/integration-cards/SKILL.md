@@ -58,6 +58,7 @@ description: Guidelines and best practices for developing UI Integration Cards (
 
 ## 3. Card Explorer
 - The Card Explorer provides detailed documentation for the Integration Cards schema, including descriptions of every property, guidance for integrating cards into hosting environments, configuration editor documentation with examples, and broader best practices. It is available at: https://ui5.sap.com/test-resources/sap/ui/integration/demokit/cardExplorer/webapp/index.html
+- The Card Explorer sample sources (manifest.json, data.json, etc.) are available in the openui5 GitHub repository: https://github.com/UI5/openui5/tree/master/src/sap.ui.integration/test/sap/ui/integration/demokit/cardExplorer/webapp/samples
 
 ## 4. Preview Instructions
 - If preview of the card must be shown, **ALWAYS** check the card folder for an existing preview file and any accompanying instructions or scripts, and reuse them if available.
@@ -87,6 +88,7 @@ When creating or modifying Integration Cards, follow these guidelines for Config
 - Assume the role of Administrator persona when designing the Configuration Editor.
 - **ALWAYS** ensure that the Configuration Editor reflects the current structure and fields of the `manifest.json`.
 - **ALWAYS** make the existing fields in the `manifest.json` configurable via the editor. For example manifest parameters, title, subtitle, icon of the header, etc.
+- **ALWAYS** ask the user if they agree to make all fields editable and what other fields should be added.
 - **NEVER** add fields to the editor that do not exist in the `manifest.json`.
 - **ALWAYS** remove fields from the editor when removing them from the `manifest.json`.
 - **ALWAYS** add fields in the Configuration Editor when adding them to the `manifest.json`.
@@ -97,7 +99,7 @@ When creating or modifying Integration Cards, follow these guidelines for Config
 - **ALWAYS** set `sap.card/content/chartType` property.
 - **ALWAYS** adjust `sap.card/content/measures`, `sap.card/content/dimensions` and `sap.card/content/feeds` to match the `sap.card/content/chartType` property and data structure. This is critical for proper data display.
 - **ALWAYS** use `sap.card/content/chartProperties` to adjust labels, colors, the legend, and other chart aspects.
-- **ALWAYS** define each feed with its type (Dimension or Measure), its unique identifier (uid), and the associated values using defined measures and dimensions. Example:
+- **ALWAYS** define each feed with its type (Dimension or Measure), its unique identifier (uid), and the associated values using defined measures and dimensions. Example (for a donut/pie chart):
 ```json
 "feeds": [
   {
