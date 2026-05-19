@@ -1,8 +1,8 @@
 {
-  "name": "@ui5/claude-plugin-ui5-guidelines",
+  "name": "@ui5/claude-plugin-ui5",
   "version": "3.0.0",
   "private": true,
-  "description": "UI5 development guidelines and best practices for Claude Code",
+  "description": "SAPUI5 / OpenUI5 plugin for Claude Code with MCP tools, API documentation, linting, and development guidelines",
   "type": "module",
   "author": {
     "name": "SAP SE",
@@ -13,7 +13,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/UI5/plugins-claude.git",
-    "directory": "plugins/ui5-guidelines"
+    "directory": "plugins/ui5"
   },
   "scripts": {
     "build": "tsc",
@@ -23,11 +23,7 @@
     "test:triggering": "ava dist/test/suites/triggering.test.js",
     "test:performance": "ava dist/test/suites/performance.test.js",
     "test:watch": "ava --watch",
-    "test:integration:claude": "ava dist/test/integration/suites/claude-code.test.js",
-    "metrics": "node dist/scripts/metrics.js",
-    "metrics:week": "node dist/scripts/metrics.js --days 7",
-    "metrics:month": "node dist/scripts/metrics.js --days 30",
-    "metrics:optimize": "node dist/scripts/optimize.js"
+    "test:integration:claude": "ava dist/test/integration/suites/claude-code.test.js"
   },
   "devDependencies": {
     "@ava/typescript": "^5.0.0",

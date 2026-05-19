@@ -268,12 +268,6 @@ npm run test:integration:claude       # Claude Code CLI (free)
 # Build
 npm run build                  # Compile TypeScript
 npm run clean                  # Remove build artifacts
-
-# Metrics
-npm run metrics                # All-time metrics
-npm run metrics:week           # Last 7 days
-npm run metrics:month          # Last 30 days
-npm run metrics:optimize       # Optimization tips
 ```
 
 ---
@@ -329,45 +323,43 @@ Token estimates are approximate (1 token ≈ 4 characters) since Claude Code CLI
 
 ---
 
-## Metrics and Analysis
+## Test Reports
 
-### View Metrics
+Integration tests automatically generate JSON and HTML reports in `.test-results/`:
 
 ```bash
-# All-time aggregate
-npm run metrics
+npm run test:integration:claude
 
-# Time-based
-npm run metrics:week
-npm run metrics:month
-
-# Get optimization tips
-npm run metrics:optimize
+# Generates:
+# .test-results/test-run-{timestamp}.json  # Detailed results
+# .test-results/latest.json                # Latest run (symlink)
+# .test-results/dashboard.html             # Visual dashboard
 ```
 
-### Metrics Tracked
+### Report Contents
 
-- ✅ Test pass/fail rates
+**JSON Report** includes:
+- ✅ Test pass/fail rates by category
 - ✅ Token usage (estimated)
 - ✅ Duration per test
-- ✅ Skill triggering accuracy (heuristic detection)
+- ✅ Skill triggering detection
+- ✅ Retry counts
+- ✅ Full test output
 
-### Example Output
+**HTML Dashboard** provides:
+- 📊 Executive metrics (pass rate, latency, tokens)
+- 📈 Category performance breakdown
+- 📋 Detailed test results table
+- 🎨 Color-coded status indicators
 
-```
-📊 UI5 Plugin Metrics (Last 7 Days)
+### Viewing Reports
 
-Tests Run: 189
-Pass Rate: 98.4% (186/189)
-Avg Duration: ~25s per test
+```bash
+# Open the latest dashboard
+open .test-results/dashboard.html
 
-🎯 Triggering Accuracy:
-Proxy Tests: 84.4% (simulation - includes edge cases)
-Integration Tests: Detected via UI5 pattern matching
-
-⚡ Performance:
-Total Duration: ~95 minutes
-Avg Latency: 24.1s per test
+# Or check JSON directly
+cat .test-results/latest.json | jq '.totalTests, .passed, .failed'
 ```
 
 ---
