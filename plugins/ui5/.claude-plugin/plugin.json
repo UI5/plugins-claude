@@ -1,7 +1,7 @@
 {
     "name": "ui5",
     "version": "0.1.0",
-    "description": "SAPUI5 / OpenUI5 plugin for Claude. Create and validate UI5 projects, access API documentation, run UI5 linter, get development guidelines and best practices for UI5 development. Covers async module loading, ComponentSupport initialization, data binding with OData types, i18n management, CSP compliance, TypeScript event handlers, MCP tooling integration, CAP integration patterns, and form creation rules.",
+    "description": "SAPUI5 / OpenUI5 plugin for Claude. Create and validate UI5 projects, access API documentation, run UI5 linter, get development guidelines and best practices for UI5 development.",
     "author": {
         "name": "SAP SE"
     },
